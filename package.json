@@ -1,0 +1,7 @@
+{
+	"name": "openwanderer-jslib",
+	"version": "0.0.1",
+	"dependencies": {
+		"photo-sphere-viewer": "^4.0.6"
+	}
+}
