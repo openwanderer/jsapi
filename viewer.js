@@ -117,7 +117,10 @@ class Viewer {
             strokeWidth: options.strokeWidth || '2px'
           },
           anchor     : '52% 102%',
-          scale      : [scale, scale] 
+          scale      : [scale, scale],
+          data : { 
+            type: 'marker'
+          }
         });
         return id; 
     }
@@ -140,7 +143,10 @@ class Viewer {
                 fill: options.fill || 'rgba(255, 255, 0, 0.5)',
                 stroke: options.stroke || 'rgba(255, 255, 0, 1.0)',
             },
-            tooltip: options.tooltip || 'Path' 
+            tooltip: options.tooltip || 'Path',
+            data: {
+                type: 'path'
+            }
         });
         return id;
     }
