@@ -98,7 +98,7 @@ class Viewer {
      */
     addMarker(lonLatElev, options = {}) {
         const sphericalCoords = this._calcSphericalCoords([lonLatElev]);
-        const id = `marker-${++this.curMarkerId}`;
+        const id = options.id || `marker-${++this.curMarkerId}`;
         let scale;
         const yp = sphericalCoords.yawPitchDist[0];
         scale = (options.scale || 1) * 10 * (1/yp[2]);
@@ -132,7 +132,7 @@ class Viewer {
      * Returns: the ID of the path.
      */
     addPath(lonLatElevs, options = {}) {
-        const sphericalCoords = this._calcSphericalCoords(lonLatElevs, options.width || 1), id = `path-${++this.curPathId}`;
+        const sphericalCoords = this._calcSphericalCoords(lonLatElevs, options.width || 1), id = options.id || `path-${++this.curPathId}`;
         this.markersPlugin.addMarker({
             id: id,
             polylineRad: sphericalCoords.path,
