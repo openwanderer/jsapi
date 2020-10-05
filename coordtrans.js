@@ -261,9 +261,9 @@ function ecefToGeodetic(X, Y, Z) {
  * returns {number} The distance in meters.
  */
 function distance(lat1, lon1, lat2, lon2) {
-	if ((lat1 == lat2) && (lon1 == lon2)) {
-		return 0;
-	} else {
+    if ((lat1 == lat2) && (lon1 == lon2)) {
+        return 0;
+    } else {
     var p = 0.017453292519943295;    // Math.PI / 180
     var c = Math.cos;
     var a = 0.5 - c((lat2 - lat1) * p)/2 + 
@@ -299,8 +299,8 @@ function enuPlusMarkerdata(b,dir) {
 
 
 
-module.exports = {
-	geodeticToEnu: geodeticToEnu,
-	enuToGeodetic: enuToGeodetic,
-	enuPlusMarkerdata: enuPlusMarkerdata
+export  {
+    geodeticToEnu, 
+    enuToGeodetic, 
+    enuPlusMarkerdata
 };

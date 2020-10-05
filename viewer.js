@@ -1,6 +1,6 @@
-const PhotoSphereViewer = require('photo-sphere-viewer');
-const MarkersPlugin = require('photo-sphere-viewer/dist/plugins/markers');
-const coordtrans = require('./coordtrans');
+import * as PhotoSphereViewer from 'photo-sphere-viewer';
+import * as MarkersPlugin from 'photo-sphere-viewer/dist/plugins/markers';
+import * as coordtrans from './coordtrans.js';
 
 /*
  * OpenWanderer.Viewer
@@ -269,4 +269,4 @@ class Viewer {
     }
 }
 
-module.exports = Viewer;
+export default Viewer; 

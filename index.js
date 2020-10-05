@@ -1,7 +1,5 @@
-/*
- * The index script for the OpenWanderer module.
- */
+import Viewer from './viewer.js';
 
-module.exports = {
-	Viewer: require('./viewer')
+export {
+    Viewer
 };
