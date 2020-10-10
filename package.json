@@ -1,7 +1,14 @@
 {
-	"name": "openwanderer-jslib",
-	"version": "0.0.1",
-	"dependencies": {
-		"photo-sphere-viewer": "^4.0.6"
-	}
+ "name": "openwanderer-jslib",
+ "version": "0.0.2",
+ "dependencies": {
+  "photo-sphere-viewer": "^4.0.6",
+  "@turf/bearing": "^6.0.1",
+  "@turf/distance": "^6.0.1",
+  "@turf/explode": "^5.1.0",
+  "jsfreemaplib": "^0.3.0",
+  "pngjs": "^5.0.0",
+  "tinyqueue": "^2.0.0",
+  "turf-point": "^2.0.1"
+ }
 }
