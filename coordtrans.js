@@ -299,15 +299,10 @@ function enuPlusMarkerdata(b,dir) {
 
 
 
-/*
+
 export  {
     geodeticToEnu, 
     enuToGeodetic, 
     enuPlusMarkerdata
 };
-*/
-module.exports =   {
-    geodeticToEnu: geodeticToEnu, 
-    enuToGeodetic: enuToGeodetic, 
-    enuPlusMarkerdata: enuPlusMarkerdata
-};
+

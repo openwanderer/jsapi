@@ -1,4 +1,3 @@
-import jsfreemaplib from 'jsfreemaplib';
 import Viewer from './viewer.js';
 
 /*
@@ -57,7 +56,6 @@ class Navigator {
         this.arrowImage = options.arrowImage || 'images/arrow.png';
         this.curPanoId = 0;
         this.foundMarkerIds = [];
-        this.sphMerc = new jsfreemaplib.GoogleProjection();
     }
 
 

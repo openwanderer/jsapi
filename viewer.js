@@ -1,5 +1,3 @@
-import * as PhotoSphereViewer from 'photo-sphere-viewer';
-import * as MarkersPlugin from 'photo-sphere-viewer/dist/plugins/markers';
 import * as coordtrans from './coordtrans.js';
 
 /*
@@ -34,10 +32,10 @@ class Viewer {
         this.psv = new PhotoSphereViewer.Viewer({
             container: document.querySelector(container || '#viewer'),
             plugins: [
-                MarkersPlugin
+                PhotoSphereViewer.MarkersPlugin
             ]
         });
-        this.markersPlugin = this.psv.getPlugin(MarkersPlugin);
+        this.markersPlugin = this.psv.getPlugin(PhotoSphereViewer.MarkersPlugin);
     }
 
     /* setLonLat()
