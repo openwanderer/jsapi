@@ -14,11 +14,13 @@ import Viewer from './viewer.js';
  *
  * Does not yet handle clicks on routes to panoramas.
  *
- * Designed to work with a range of 'nearby panorama providers'. The
- * 'loadNearbysFunc' option allows you to specify a function which will
- * return an object containing nearby panoramas and routes to those panoramas.
- * It should contain a 'routes' property containing an array of routes 
- * (to nearby panos along a given bearing). Each route should have a path
+ * Designed to work with a range of 'sequence providers'. The
+ * 'loadSeqProviderFunc' option allows you to specify a function which will
+ * return an object containing the sequence(s) that the current panorama 
+ * belongs to.
+ *
+ * It should contain a 'sequences' property containing an array of sequences
+ * that the panorama belongs to. Each sequence should have a path
  * (array of points: each point should be an array containing actual WGS84 
  * coords together with elevation in metres) together with an array of panos
  * along that path (each pano should be an object containing id, lon, lat and
@@ -29,7 +31,7 @@ class Navigator {
     constructor(options) {
         options = options || { };
         options.api = options.api || { };
-        this.loadNearbysFunc = options.loadNearbysFunc;
+        this.loadSeqProviderFunc = options.loadSeqProviderFunc;
         this.viewer = new Viewer(options.element || '#pano');
         this.lat = 0.0;
         this.lon = 0.0;
@@ -98,7 +100,7 @@ class Navigator {
                 this.panoMetadata[id].poseheadingdegrees = properties.poseheadingdegrees;
             }
 
-            this.panoMetadata[id].routes = null;
+            this.panoMetadata[id].sequence = null;
 
             if(this.curPanoId == id) {    
                 await this.loadPanorama(id);
@@ -112,13 +114,14 @@ class Navigator {
 
     async _loadMarkers(id) {    
         this.viewer.markersPlugin.clearMarkers();
-        if(!this.panoMetadata[id].routes) {
-            const routes = await this.loadNearbysFunc(
-                this.panoMetadata[id]
+        console.log(this.panoMetadata[id].sequence);
+        if(!this.panoMetadata[id].sequence) {
+            const sequence = await this.loadSeqProviderFunc(
+                this.panoMetadata[id].seqid
             );
-            this._onFoundNearbys(id, routes);
+            this._onFoundSeqProvider(id, sequence);
         } else {
-              this._setPano(id);
+            this._setPano(id);
         }
     }
 
@@ -129,9 +132,9 @@ class Navigator {
         return this.panoMetadata[id];
     }
 
-   _onFoundNearbys(origPanoId, routes) {
-        this.panoMetadata[origPanoId].routes = routes.paths;
-        this.panoMetadata[origPanoId].altitude = routes.altitude;
+   _onFoundSeqProvider(origPanoId, sequence) {
+        this.panoMetadata[origPanoId].sequence = sequence;
+        this.panoMetadata[origPanoId].altitude = 0; 
         this._setPano(origPanoId);
     }
 
@@ -158,19 +161,17 @@ class Navigator {
     }
 
     _createPaths(id) {
-        this.panoMetadata[id].routes.forEach ( route => {
-            route.panos.forEach ( pano => {
-                pano.key = `marker-${id}-${pano.id}`;
-                this.viewer.addMarker([pano.lon, pano.lat, pano.altitude], { 
-                    id : pano.key, 
-                    tooltip: `Location of pano ${pano.id}` 
-                } );
+        this.panoMetadata[id].sequence.panos.forEach ( pano => {
+            pano.key = `marker-${id}-${pano.id}`;
+            this.viewer.addMarker([pano.lon, pano.lat, pano.altitude], { 
+                id : pano.key, 
+                tooltip: `Location of pano ${pano.id}` 
             } );
-            route.key = `path-${id}-${route.bearing}`;
-            this.viewer.addPath(route.path, { 
-                tooltip: `bearing ${route.bearing}`, 
-                id: route.key 
-            });
+        });
+        this.panoMetadata[id].sequence.key = `path-${id}-${this.panoMetadata[id].sequence.seqid}`;
+        this.viewer.addPath(this.panoMetadata[id].sequence.path, { 
+            tooltip: `sequence ${this.panoMetadata[id].sequence.seqid}`, 
+            id: this.panoMetadata[id].sequence.key 
         });
     }
 }
