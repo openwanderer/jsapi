@@ -19,10 +19,10 @@ import Viewer from './viewer.js';
  * return an object containing the sequence(s) that the current panorama 
  * belongs to.
  *
- * It should contain a 'sequences' property containing an array of sequences
- * that the panorama belongs to. Each sequence should have a path
- * (array of points: each point should be an array containing actual WGS84 
- * coords together with elevation in metres) together with an array of panos
+ * It should return the sequence that the panorama belongs to. 
+ * Each sequence should have a 'path' property (array of points: each point 
+ * should be an array containing actual WGS84 coords together with elevation 
+ * in metres) together with a 'panos' property containing an array of panos 
  * along that path (each pano should be an object containing id, lon, lat and
  * altitude properties).
  */
@@ -58,6 +58,7 @@ class Navigator {
         this.arrowImage = options.arrowImage || 'images/arrow.png';
         this.curPanoId = 0;
         this.foundMarkerIds = [];
+        this.sequences = [];
     }
 
 
@@ -116,10 +117,16 @@ class Navigator {
         this.viewer.markersPlugin.clearMarkers();
         console.log(this.panoMetadata[id].sequence);
         if(!this.panoMetadata[id].sequence) {
-            const sequence = await this.loadSeqProviderFunc(
-                this.panoMetadata[id].seqid
+            if(!this.sequences[this.panoMetadata[id].seqid]) {
+                this.sequences[this.panoMetadata[id].seqid] = 
+                    await this.loadSeqProviderFunc( 
+                        this.panoMetadata[id].seqid
+                    );
+            }
+            this._onLoadedSequence(
+                id, 
+                this.sequences[this.panoMetadata[id].seqid]
             );
-            this._onFoundSeqProvider(id, sequence);
         } else {
             this._setPano(id);
         }
@@ -132,7 +139,7 @@ class Navigator {
         return this.panoMetadata[id];
     }
 
-   _onFoundSeqProvider(origPanoId, sequence) {
+   _onLoadedSequence(origPanoId, sequence) {
         this.panoMetadata[origPanoId].sequence = sequence;
         this.panoMetadata[origPanoId].altitude = 0; 
         this._setPano(origPanoId);
