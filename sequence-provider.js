@@ -1,7 +1,7 @@
 /*
  * SimpleSequenceProvider
  *
- * A simple provider of sequence data.
+ * A Simple provider of sequence data.
  * 
  * Assumes the sequence path is simply straight lines between the panoramas
  * in the sequence.
@@ -25,12 +25,14 @@ class SimpleSequenceProvider {
             panos: json.properties.ids.map ( (id,i) => {
                 return {
                     id: id,
-                    lon: json.geometry.coordinates[i][0],
-                    lat: json.geometry.coordinates[i][1],
-                    altitude: 0
+                    coordinates: [
+                        json.geometry.coordinates[i][0],
+                        json.geometry.coordinates[i][1],
+                        0
+                    ]
                 }
             })
-        }; 
+        };
         return result;
     }
 }

@@ -15,7 +15,7 @@ import Viewer from './viewer.js';
  * Does not yet handle clicks on routes to panoramas.
  *
  * Designed to work with a range of 'sequence providers'. The
- * 'loadSeqProviderFunc' option allows you to specify a function which will
+ * 'loadSequence' option allows you to specify a function which will
  * return an object containing the sequence(s) that the current panorama 
  * belongs to.
  *
@@ -23,15 +23,15 @@ import Viewer from './viewer.js';
  * Each sequence should have a 'path' property (array of points: each point 
  * should be an array containing actual WGS84 coords together with elevation 
  * in metres) together with a 'panos' property containing an array of panos 
- * along that path (each pano should be an object containing id, lon, lat and
- * altitude properties).
+ * along that path (each pano should be an object containing an 'id'
+ * attribute (the pano ID) and an array containing lon, lat and altitude.
  */
 class Navigator {
 
     constructor(options) {
         options = options || { };
         options.api = options.api || { };
-        this.loadSeqProviderFunc = options.loadSeqProviderFunc;
+        this.loadSequence = options.loadSequence;
         this.viewer = new Viewer(options.element || '#pano');
         this.lat = 0.0;
         this.lon = 0.0;
@@ -119,7 +119,7 @@ class Navigator {
         if(!this.panoMetadata[id].sequence) {
             if(!this.sequences[this.panoMetadata[id].seqid]) {
                 this.sequences[this.panoMetadata[id].seqid] = 
-                    await this.loadSeqProviderFunc( 
+                    await this.loadSequence( 
                         this.panoMetadata[id].seqid
                     );
             }
@@ -170,7 +170,7 @@ class Navigator {
     _createPaths(id) {
         this.panoMetadata[id].sequence.panos.forEach ( pano => {
             pano.key = `marker-${id}-${pano.id}`;
-            this.viewer.addMarker([pano.lon, pano.lat, pano.altitude], { 
+            this.viewer.addMarker(pano.coordinates, { 
                 id : pano.key, 
                 tooltip: `Location of pano ${pano.id}` 
             } );
