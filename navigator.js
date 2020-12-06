@@ -23,8 +23,8 @@ import Viewer from './viewer.js';
  * Each sequence should have a 'path' property (array of points: each point 
  * should be an array containing actual WGS84 coords together with elevation 
  * in metres) together with a 'panos' property containing an array of panos 
- * along that path (each pano should be an object containing an 'id'
- * attribute (the pano ID) and an array containing lon, lat and altitude.
+ * along that path (each pano should be an object containing 'panoid',
+ * 'lon', 'lat', 'alt' and 'poseheadingdegrees' properties)
  */
 class Navigator {
 
@@ -143,6 +143,13 @@ class Navigator {
         this.panoMetadata[origPanoId].sequence = sequence;
         this.panoMetadata[origPanoId].altitude = 0; 
         this._setPano(origPanoId);
+        sequence.panos.forEach ( pano => {
+            if (!this.panoMetadata[pano.panoid]) {
+                this.panoMetadata[pano.panoid] = Object.assign({
+                    seqid: this.panoMetadata[origPanoId].seqid
+                }, pano);
+            }
+        });    
     }
 
     _setPano(id) { 
