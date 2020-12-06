@@ -71,7 +71,7 @@ class Navigator {
     }
 
     async loadPanorama(id) {
-        if(!this.panoMetadata[id]) {
+        if(!this.panoMetadata[id] && this.api.byId !== undefined) {
              await this._loadPanoMetadata(id);
         } 
 
