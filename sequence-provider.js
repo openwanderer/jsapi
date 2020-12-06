@@ -21,17 +21,8 @@ class SimpleSequenceProvider {
         const json = await seqResponse.json();
         const result = { 
             seqid: seqid,
-            path: json.geometry.coordinates, 
-            panos: json.properties.ids.map ( (id,i) => {
-                return {
-                    id: id,
-                    coordinates: [
-                        json.geometry.coordinates[i][0],
-                        json.geometry.coordinates[i][1],
-                        0
-                    ]
-                }
-            })
+            path: json.map ( pano => [pano.lon, pano.lat, pano.alt] ),
+            panos: json
         };
         return result;
     }

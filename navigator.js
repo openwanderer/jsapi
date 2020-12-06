@@ -169,10 +169,10 @@ class Navigator {
 
     _createPaths(id) {
         this.panoMetadata[id].sequence.panos.forEach ( pano => {
-            pano.key = `marker-${id}-${pano.id}`;
-            this.viewer.addMarker(pano.coordinates, { 
+            pano.key = `marker-${id}-${pano.panoid}`;
+            this.viewer.addMarker([pano.lon, pano.lat, pano.alt], { 
                 id : pano.key, 
-                tooltip: `Location of pano ${pano.id}` 
+                tooltip: `Location of pano ${pano.panoid}` 
             } );
         });
         this.panoMetadata[id].sequence.key = `path-${id}-${this.panoMetadata[id].sequence.seqid}`;
