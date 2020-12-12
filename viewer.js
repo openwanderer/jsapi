@@ -1,4 +1,4 @@
-import * as coordtrans from './coordtrans.js';
+const coordtrans = require('./coordtrans');
 
 /*
  * OpenWanderer.Viewer
@@ -267,4 +267,4 @@ class Viewer {
     }
 }
 
-export default Viewer; 
+module.exports = Viewer; 

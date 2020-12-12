@@ -1,4 +1,4 @@
-import Viewer from './viewer.js';
+const Viewer = require('./viewer');
 
 /*
  * OpenWanderer.Navigator class
@@ -24,7 +24,7 @@ import Viewer from './viewer.js';
  * should be an array containing actual WGS84 coords together with elevation 
  * in metres) together with a 'panos' property containing an array of panos 
  * along that path (each pano should be an object containing 'panoid',
- * 'lon', 'lat', 'alt' and 'poseheadingdegrees' properties)
+ * 'lon', 'lat', 'ele' and 'poseheadingdegrees' properties)
  */
 class Navigator {
 
@@ -92,30 +92,12 @@ class Navigator {
         });
     }
 
-    async update(id, properties) {
-        if(this.panoMetadata[id]) {
-            if(properties.position) {
-                this.panoMetadata[id].lon = properties.position[0];
-                this.panoMetadata[id].lat = properties.position[1];
-            } else if (properties.poseheadingdegrees) {
-                this.panoMetadata[id].poseheadingdegrees = properties.poseheadingdegrees;
-            }
-
-            this.panoMetadata[id].sequence = null;
-
-            if(this.curPanoId == id) {    
-                await this.loadPanorama(id);
-            }
-        }
-    }
-
     on(evName,evHandler) {
         this.eventHandlers[evName] = evHandler;
     }
 
     async _loadMarkers(id) {    
         this.viewer.markersPlugin.clearMarkers();
-        console.log(this.panoMetadata[id].sequence);
         if(!this.panoMetadata[id].sequence) {
             if(!this.sequences[this.panoMetadata[id].seqid]) {
                 this.sequences[this.panoMetadata[id].seqid] = 
@@ -136,12 +118,12 @@ class Navigator {
     async _loadPanoMetadata(id) {
         this.panoMetadata[id] = await fetch(this.api.byId.replace('{id}', id))
                                 .then(response => response.json());
+        this.panoMetadata[id].ele = parseFloat(this.panoMetadata[id].ele);
         return this.panoMetadata[id];
     }
 
    _onLoadedSequence(origPanoId, sequence) {
         this.panoMetadata[origPanoId].sequence = sequence;
-        this.panoMetadata[origPanoId].altitude = 0; 
         this._setPano(origPanoId);
         sequence.panos.forEach ( pano => {
             if (!this.panoMetadata[pano.panoid]) {
@@ -155,7 +137,7 @@ class Navigator {
     _setPano(id) { 
         this._setPanoId(id);
         this.viewer.setLonLat(this.panoMetadata[id].lon, this.panoMetadata[id].lat);
-        this.viewer.setElevation(this.panoMetadata[id].altitude + 1.5);
+        this.viewer.setElevation(this.panoMetadata[id].ele + 1.5);
         this._createPaths(id);
     }
 
@@ -177,7 +159,7 @@ class Navigator {
     _createPaths(id) {
         this.panoMetadata[id].sequence.panos.forEach ( pano => {
             pano.key = `marker-${id}-${pano.panoid}`;
-            this.viewer.addMarker([pano.lon, pano.lat, pano.alt], { 
+            this.viewer.addMarker([pano.lon, pano.lat, pano.ele], { 
                 id : pano.key, 
                 tooltip: `Location of pano ${pano.panoid}` 
             } );
@@ -190,4 +172,4 @@ class Navigator {
     }
 }
 
-export default Navigator;
+module.exports = Navigator;

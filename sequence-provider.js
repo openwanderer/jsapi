@@ -21,11 +21,11 @@ class SimpleSequenceProvider {
         const json = await seqResponse.json();
         const result = { 
             seqid: seqid,
-            path: json.map ( pano => [pano.lon, pano.lat, pano.alt] ),
+            path: json.map ( pano => [pano.lon, pano.lat, parseFloat(pano.ele)] ),
             panos: json
         };
         return result;
     }
 }
 
-export default SimpleSequenceProvider;
+module.exports = SimpleSequenceProvider;

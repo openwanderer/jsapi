@@ -1,8 +1,8 @@
-import Viewer from './viewer.js';
-import Navigator from './navigator.js';
-import SimpleSequenceProvider from './sequence-provider.js';
+const Viewer = require('./viewer');
+const Navigator = require('./navigator');
+const SimpleSequenceProvider = require('./sequence-provider');
 
-export {
+module.exports = {
     Viewer,
     Navigator,
     SimpleSequenceProvider
