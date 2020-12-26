@@ -1,4 +1,5 @@
 const Viewer = require('./viewer');
+const GANav = require('./ganav');
 
 /*
  * OpenWanderer.Navigator class
@@ -36,6 +37,7 @@ class Navigator {
         this.lat = 0.0;
         this.lon = 0.0;
         this.eventHandlers = {};
+        this.gaNav = options.gaNav ? new GANav(this) : null; // use Eesger's new navigation code?
         this.resizePano = options.resizePano;
         this.api = { };
         this.api.nearest = options.api.nearest;
@@ -43,7 +45,8 @@ class Navigator {
         this.api.panoImg = options.api.panoImg; 
         this.api.panoImgResized = options.api.panoImgResized; 
         this.panoMetadata = { };
-        this.viewer.markersPlugin.on("select-marker", async (e, marker, data) => {
+        if(!this.gaNav) {
+            this.viewer.markersPlugin.on("select-marker", async (e, marker, data) => {
             let id;
             switch(marker.data.type) {
                 case 'path':
@@ -54,11 +57,13 @@ class Navigator {
                     break;
             }
             if(id !== undefined) await this.loadPanorama(id);
-        });
+            });
+        }
         this.arrowImage = options.arrowImage || 'images/arrow.png';
         this.curPanoId = 0;
         this.foundMarkerIds = [];
         this.sequences = [];
+        this.imageNow = 0;
     }
 
 
@@ -125,11 +130,14 @@ class Navigator {
    _onLoadedSequence(origPanoId, sequence) {
         this.panoMetadata[origPanoId].sequence = sequence;
         this._setPano(origPanoId);
-        sequence.panos.forEach ( pano => {
+        sequence.panos.forEach ( (pano, i) => {
             if (!this.panoMetadata[pano.panoid]) {
                 this.panoMetadata[pano.panoid] = Object.assign({
                     seqid: this.panoMetadata[origPanoId].seqid
                 }, pano);
+            }
+            if(pano.panoid == origPanoId) {
+                this.imageNow = i;
             }
         });    
     }
@@ -157,18 +165,22 @@ class Navigator {
     }
 
     _createPaths(id) {
-        this.panoMetadata[id].sequence.panos.forEach ( pano => {
-            pano.key = `marker-${id}-${pano.panoid}`;
-            this.viewer.addMarker([pano.lon, pano.lat, pano.ele], { 
-                id : pano.key, 
-                tooltip: `Location of pano ${pano.panoid}` 
-            } );
-        });
-        this.panoMetadata[id].sequence.key = `path-${id}-${this.panoMetadata[id].sequence.seqid}`;
-        this.viewer.addPath(this.panoMetadata[id].sequence.path, { 
-            tooltip: `sequence ${this.panoMetadata[id].sequence.seqid}`, 
-            id: this.panoMetadata[id].sequence.key 
-        });
+        if(this.gaNav) {
+            this.gaNav.createPaths(id);
+        } else {
+            this.panoMetadata[id].sequence.panos.forEach ( pano => {
+                pano.key = `marker-${id}-${pano.panoid}`;
+                this.viewer.addMarker([pano.lon, pano.lat, pano.ele], { 
+                    id : pano.key, 
+                    tooltip: `Location of pano ${pano.panoid}` 
+                } );
+            });
+            this.panoMetadata[id].sequence.key = `path-${id}-${this.panoMetadata[id].sequence.seqid}`;
+            this.viewer.addPath(this.panoMetadata[id].sequence.path, { 
+                tooltip: `sequence ${this.panoMetadata[id].sequence.seqid}`, 
+                id: this.panoMetadata[id].sequence.key 
+            });
+        }
     }
 }
 
