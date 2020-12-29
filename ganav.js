@@ -7,6 +7,20 @@ const coordtrans = require('./coordtrans');
 class GANav {
     constructor(nav) {
         this.nav = nav;
+
+        // Modify to attempt to dynamically create the svg.
+        // Dynamically creating the svg does not lead to the desired effect.
+        // It is added to the DOM (innerHTML is supposed to now work on SVG)
+        // but does not appear to be activated.
+        const svg = document.createElement('svg');
+        svg.setAttribute('height', 1);
+        svg.setAttribute('width', 1);
+        svg.style.position = 'absolute';
+        svg.style.top = '-1px';
+        svg.style.left = '-1px';
+        svg.innerHTML = '<defs><radialGradient id="GAgradient1" cx="50%" cy="50%" r="50%" fx="50%" fy="50%"> <stop offset="0%" stop-color="rgba(255, 255, 255, 1.0)"/><stop offset="25%"  stop-color="rgba(255, 255, 255, 1.0)"/><stop offset="100%" stop-color="rgba(255, 255, 255, 0.4)"/></radialGradient></defs>';
+//        document.body.appendChild(svg);
+
         this.gaVars = {
             baseHeight: 3.0,
             flattener: 0.8,
@@ -25,6 +39,8 @@ class GANav {
         this.markerSearch = [];
         this.data = [];
 
+
+
         this.nav.viewer.markersPlugin.on('select-marker', (e, marker, data) => {
             const pos = {
                 x: e.offsetX,
@@ -40,7 +56,8 @@ class GANav {
                     'select-marker'
                 );
                 if(imageNew >= 0) {
-                    /*TODO*/ goTo(imageNew);
+                    //TODO goTo(imageNew);
+                    alert(`Going to ${imageNew} - TODO!`);
                 }
             }
         });
@@ -62,24 +79,26 @@ class GANav {
     // Original code by Eesger Toering ;  modified to fit in
     // with the navigator code
     createPaths(id) {
-        console.log(`createPaths(): ${id}`);
+        this.markerSearch = [];
+        this.nav.viewer.markersPlugin.clearMarkers();
         let polyPath = [ 0, [] ];
         let i, b;
         for(i=0; i<this.nav.panoMetadata[id].sequence.panos.length; i++) {
-            console.log(i);
             if(this.nav.panoMetadata[id].sequence.panos.length == 1) continue;
             const pano = this.nav.panoMetadata[id].sequence.panos[i];
             const latDelta = Math.abs(this.nav.panoMetadata[id].lat - pano.lat);
-            console.log(`${this.nav.panoMetadata[id].lat} ${pano.lat}`);
             if(latDelta * 111 * 1000 > 200) {
                 polyPath = [polyPath[0] + 1, [] ];
                 continue;
             }
+            // skip lon next..
             const lonDelta = Math.abs(this.nav.panoMetadata[id].lon - pano.lon);
             if(lonDelta * Math.pow(290-(105+pano.lon), 1.065) * 1000 > 200) {
                 polyPath = [polyPath[0] + 1, [] ];
                 continue;
             }
+            // reposition the spot directly below.. a minimum distance is 
+            // needed because directly below (-.5*PI) there is no impact of yaw!
             if(id == pano.panoid) {
                 const theOtherOne = (i==0) ? 
                     this.nav.panoMetadata[id].sequence.panos[1] : 
@@ -90,6 +109,7 @@ class GANav {
                     theOtherOne.lon,
                     theOtherOne.lat
                 );
+                // Half 1/distance
                 const distance2 = (distance1 < 0.7) ? 0.9 : 0.5/distance1;
                 distance1 = 1 - distance2;
 
@@ -99,9 +119,8 @@ class GANav {
                     0,
                     this.nav.panoMetadata[id].lat,
                     this.nav.panoMetadata[id].lon,
-                    this.nav.panoMetadata[id].ele + this.gaVars.baseHeight * 0.9
+                    this.gaVars.baseHeight * 0.9
                 );
-                     
             } else {
                 b = coordtrans.geodeticToEnu(
                     pano.lat,
@@ -112,12 +131,15 @@ class GANav {
                     this.nav.panoMetadata[id].ele * this.gaVars.flattener + this.gaVars.baseHeight
                 );
             }    
+            // into the ground by X degrees
             b[3] = Math.sqrt(b[0]*b[0] + b[1]*b[1]);
             b[2] -= Math.sin ( this.gaVars.degDown * Math.PI/180) * b[3];
-            
+               // b[3] = distance | b[4] = radians Pitch (-.5pi - 0.5pi)
+            // b[5] = radians Yaw (0 - 2pi)
             b = coordtrans.enuPlusMarkerdata(b, 
-                    this.nav.panoMetadata[id].poseheadingdegrees);
+                    -this.nav.panoMetadata[id].poseheadingdegrees);
 
+            // b[6] = marker scale (result formula is via trial and error ;)
             b[6] =  (300/(b[3]>300 ? 300:b[3]))*(4/100)+0.03;
 
             // store the data for later usage (faster!!)
@@ -142,7 +164,8 @@ class GANav {
             // now it is only a polyline of one image to the next, 
             // so that a circle gradient can be placed on the mouse over, 
             // for a cooler effect ;)
-            if (b[3] > 100) {
+            //if (b[3] > 100) {
+            if(true) {
                   if (polyPath[1].length > 2 ) {
                     this.nav.viewer.markersPlugin.addMarker({
                           id  : 'polygon'+i, // now the polyline number is the same as the image number (for catching which one to highlite..)

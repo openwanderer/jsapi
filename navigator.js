@@ -34,10 +34,10 @@ class Navigator {
         options.api = options.api || { };
         this.loadSequence = options.loadSequence;
         this.viewer = new Viewer(options.element || '#pano');
+        this.gaNav = options.gaNav ? new GANav(this) : null; // use Eesger's new navigation code?
         this.lat = 0.0;
         this.lon = 0.0;
         this.eventHandlers = {};
-        this.gaNav = options.gaNav ? new GANav(this) : null; // use Eesger's new navigation code?
         this.resizePano = options.resizePano;
         this.api = { };
         this.api.nearest = options.api.nearest;
@@ -102,8 +102,10 @@ class Navigator {
     }
 
     async _loadMarkers(id) {    
+		console.log(`_loadMarkers: ${id}`);
         this.viewer.markersPlugin.clearMarkers();
         if(!this.panoMetadata[id].sequence) {
+			console.log('loading sequence');
             if(!this.sequences[this.panoMetadata[id].seqid]) {
                 this.sequences[this.panoMetadata[id].seqid] = 
                     await this.loadSequence( 
@@ -128,9 +130,10 @@ class Navigator {
     }
 
    _onLoadedSequence(origPanoId, sequence) {
+		console.log(`onLoadedSequence: origPanoId=${origPanoId}`);
         this.panoMetadata[origPanoId].sequence = sequence;
-        this._setPano(origPanoId);
         sequence.panos.forEach ( (pano, i) => {
+			console.log(`Panoid in sequence ${pano.panoid}`);
             if (!this.panoMetadata[pano.panoid]) {
                 this.panoMetadata[pano.panoid] = Object.assign({
                     seqid: this.panoMetadata[origPanoId].seqid
@@ -140,12 +143,14 @@ class Navigator {
                 this.imageNow = i;
             }
         });    
+        this._setPano(origPanoId);
     }
 
     _setPano(id) { 
         this._setPanoId(id);
         this.viewer.setLonLat(this.panoMetadata[id].lon, this.panoMetadata[id].lat);
         this.viewer.setElevation(this.panoMetadata[id].ele + 1.5);
+        //this.viewer.setElevation(1.5);
         this._createPaths(id);
     }
 

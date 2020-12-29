@@ -290,8 +290,11 @@ function enuPlusMarkerdata(b,dir) {
   // b5 = radians Yaw (0 - 2pi)
   b[5] = Math.atan2(b[0],b[1]);
   if (b[5] < 0) { b[5]+=2*Math.PI; }
-  b[5]-= dir/(2*Math.PI);
+  if (b[5] > 2*Math.PI) { b[5] -= 2*Math.PI; }
+
+  b[5]-= dir*(2*Math.PI)/360;
   if (b[5] < 0) { b[5]+=2*Math.PI; }
+  if (b[5] > 2*Math.PI) { b[5] -= 2*Math.PI; }
   
   return b;
 }
