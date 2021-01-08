@@ -100,9 +100,13 @@ class GANav {
             // reposition the spot directly below.. a minimum distance is 
             // needed because directly below (-.5*PI) there is no impact of yaw!
             if(id == pano.panoid) {
+                console.log(`NOTE!!! id=pano.panoid ${id}... index=${i}`);
+                if(i==0) console.log('theOtherOne=1') ;else console.log(`theOtherOne=${i-1}`);
                 const theOtherOne = (i==0) ? 
                     this.nav.panoMetadata[id].sequence.panos[1] : 
                     this.nav.panoMetadata[id].sequence.panos[i-1] ; 
+                // Not sure what distance1 and distance2 are used for or whether they are even needed
+                // if removed the line does not cover the current pano
                 let distance1 = this.haversineDist(
                     this.nav.panoMetadata[id].lon,
                     this.nav.panoMetadata[id].lat,
@@ -114,7 +118,7 @@ class GANav {
                 distance1 = 1 - distance2;
 
                 b = coordtrans.geodeticToEnu(
-                    theOtherOne.lat * distance2 + pano.lat * distance1,
+                   theOtherOne.lat * distance2 + pano.lat * distance1,
                     theOtherOne.lon * distance2 + pano.lon * distance1,
                     0,
                     this.nav.panoMetadata[id].lat,
@@ -136,8 +140,7 @@ class GANav {
             b[2] -= Math.sin ( this.gaVars.degDown * Math.PI/180) * b[3];
                // b[3] = distance | b[4] = radians Pitch (-.5pi - 0.5pi)
             // b[5] = radians Yaw (0 - 2pi)
-            b = coordtrans.enuPlusMarkerdata(b, 
-                    -this.nav.panoMetadata[id].poseheadingdegrees);
+            b = coordtrans.enuPlusMarkerdata(b, this.nav.viewer.heading);
 
             // b[6] = marker scale (result formula is via trial and error ;)
             b[6] =  (300/(b[3]>300 ? 300:b[3]))*(4/100)+0.03;
@@ -147,17 +150,11 @@ class GANav {
 
               // create polyline to show the path of the images!
             if ( i <  this.nav.imageNow || (i == this.nav.imageNow && i != 0) ) {
-                  polyPath[1].push([b[5]-b[6]/this.gaVars.pathWidth,
-                        b[4],
-                      ]);
-                  polyPath[1].unshift([Math.round((b[5]+b[6]/this.gaVars.pathWidth)*1000)/1000, b[4], ]);
+                polyPath[1].push([b[5]-b[6]/this.gaVars.pathWidth, b[4] ]); 
+                polyPath[1].unshift([Math.round((b[5]+b[6]/this.gaVars.pathWidth)*1000)/1000, b[4] ]);
             } else {
-                  polyPath[1].push([Math.round((b[5]+b[6]/this.gaVars.pathWidth)*1000)/1000,
-                        b[4],
-                       ]);
-                  polyPath[1].unshift([b[5]-b[6]/this.gaVars.pathWidth,
-                           b[4],
-                          ]);
+                polyPath[1].push([Math.round((b[5]+b[6]/this.gaVars.pathWidth)*1000)/1000, b[4] ]);
+                polyPath[1].unshift([b[5]-b[6]/this.gaVars.pathWidth, b[4] ]);
             }
             // in an earlier version the path was created for every 100 images 
             //or when the distance was over 100 meters
