@@ -110,8 +110,8 @@ class Viewer {
            // source for path: https://commons.wikimedia.org/wiki/File:Map_marker.svg
           path       : options.path || 'M182.9,551.7c0,0.1,0.2,0.3,0.2,0.3S358.3,283,358.3,194.6c0-130.1-88.8-186.7-175.4-186.9 C96.3,7.9,7.5,64.5,7.5,194.6c0,88.4,175.3,357.4,175.3,357.4S182.9,551.7,182.9,551.7z M122.2,187.2c0-33.6,27.2-60.8,60.8-60.8 c33.6,0,60.8,27.2,60.8,60.8S216.5,248,182.9,248C149.4,248,122.2,220.8,122.2,187.2z',
           svgStyle:  {
-            fill       : options.fill || 'rgba(255, 255, 0, 0.5)',
-            stroke     : options.stroke || 'rgb(255, 255, 1.0)',
+            fill       : options.fill || 'rgba(255, 255, 255, 0.4)',
+            stroke     : options.stroke || 'rgb(255, 255, 255, 1.0)',
             strokeWidth: options.strokeWidth || '2px'
           },
           anchor     : '52% 102%',
@@ -133,19 +133,36 @@ class Viewer {
      * Returns: the ID of the path.
      */
     addPath(lonLatElevs, options = {}) {
-        const sphericalCoords = this._calcSphericalCoords(lonLatElevs, options.width || 1), id = options.id || `path-${++this.curPathId}`;
-        this.markersPlugin.addMarker({
-            id: id,
-            polylineRad: sphericalCoords.path,
-            svgStyle: {
-                fill: options.fill || 'rgba(255, 255, 0, 0.5)',
-                stroke: options.stroke || 'rgba(255, 255, 0, 1.0)',
-            },
-            tooltip: options.tooltip || 'Path',
-            data: {
-                type: 'path'
-            }
-        });
+        const sphericalCoords = this._calcSphericalCoords(lonLatElevs, options.width || 1, options), id = options.id || `path-${++this.curPathId}`;
+        if(options.splitPath === true) {
+            sphericalCoords.path.forEach ( (polygon,i) => {
+                this.markersPlugin.addMarker({
+                    id: `${id}-${i}`,
+                    polylineRad: polygon, 
+                    svgStyle: {
+                        fill: options.fill || 'rgba(255, 255, 255, 0.4)',
+                        stroke: options.stroke || 'rgba(255, 255, 255, 1.0)',
+                    },
+                    tooltip: `Sequence ${id}`,
+                    data: {
+                        type: 'path'
+                    }
+                });
+            });
+        } else {
+            this.markersPlugin.addMarker({
+                id: id,
+                polylineRad: sphericalCoords.path,
+                svgStyle: {
+                    fill: options.fill || 'rgba(255, 255, 255, 0.4)',
+                    stroke: options.stroke || 'rgba(255, 255, 255, 1.0)',
+                },
+                tooltip: options.tooltip || 'Path',
+                data: {
+                    type: 'path'
+                }
+            });
+        }
         return id;
     }
 
@@ -165,7 +182,7 @@ class Viewer {
      * - path (only returned if pathWidth is defined): yaw/pitch/distance for 
      * a polygonal path of a given width defined by the input points 
      */
-    _calcSphericalCoords(points, pathWidth) {
+    _calcSphericalCoords(points, pathWidth, options={}) {
         const values = {
             yawPitchDist: [],
             path: []
@@ -177,12 +194,18 @@ class Viewer {
 
             projectedCoords.push([b[0], b[1], b[2]]); 
 
+            // based on Eesger's code to adjust downwards
+            if(options.degDown) {
+                b[3] = Math.sqrt(b[0]*b[0] + b[1]*b[1]);
+                b[2] -= Math.sin(options.degDown * Math.PI/180) * b[3];
+            }
+
             b = coordtrans.enuPlusMarkerdata(b, this.heading); 
 
             values.yawPitchDist.push([b[5], b[4], b[3]]);
         });
         if(pathWidth !== undefined) {
-            values.path = this._createPath(projectedCoords, pathWidth);
+            values.path = this._createPath(projectedCoords, pathWidth, options.splitPath);
         }
         return values;
     }
@@ -193,7 +216,7 @@ class Viewer {
      * Input: a projected polyline (ENU)
      * Returns: yaw/pitch of a polygon of the given width 
      */
-    _createPath(projectedCoords, width) {
+    _createPath(projectedCoords, width, split=false) {
         // ASSUMPTION projectedCoords[0] is easting, [1] is northing, [2] is elevation
         const path = [];
         const polyProj = this._createPathPolygon(projectedCoords, width);
@@ -203,7 +226,7 @@ class Viewer {
             b = coordtrans.enuPlusMarkerdata(p, this.heading);
             path.push([b[5], b[4]]);
         });
-        return path;
+        return split ? this._splitPolygon(path) : path;
     }
 
 
@@ -262,8 +285,31 @@ class Viewer {
             projectedPath[k][2]
             
         ];
-       
+
         return polygon;
+    }
+
+    /* _splitPolygon()
+     *
+     * Internal method to split a polygon representing a path of a given
+     * width into subpolygons, one pano to another.
+     *
+     * This is allow us to navigate to another pano by clicking on the path.
+     *
+     * Input: an array of projected (metre) coordinates of a particular width as a polygon
+     * Output: an array of arrays containing the subpolygons
+     */
+    _splitPolygon(polygon) {
+        const multipolygon=[]; 
+        for(let i=0; i<polygon.length / 2 - 1; i++) {    
+            multipolygon.push([
+                polygon[i],
+                polygon[i+1],
+                polygon[polygon.length-2-i],
+                polygon[polygon.length-1-i]
+            ]);
+        }
+        return multipolygon;
     }
 }
 

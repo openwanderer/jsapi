@@ -283,7 +283,7 @@ function distance(lat1, lon1, lat2, lon2) {
  */
 function enuPlusMarkerdata(b,dir) {
   // b3 = distance (m)
-  b[3] = Math.sqrt(b[0]*b[0] + b[1]*b[1]);
+  if(b[3] === undefined) b[3] = Math.sqrt(b[0]*b[0] + b[1]*b[1]);
   // b4 = radians Pitch (-.5pi - 0.5pi) (looking down.. the minus..)
   b[4] = Math.atan2(b[2]*-1,b[3])*-1;
   
@@ -306,6 +306,7 @@ function enuPlusMarkerdata(b,dir) {
 module.exports =  {
     geodeticToEnu, 
     enuToGeodetic, 
-    enuPlusMarkerdata
+    enuPlusMarkerdata,
+    distance
 };
 

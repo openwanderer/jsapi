@@ -1,5 +1,4 @@
 const Viewer = require('./viewer');
-const GANav = require('./ganav');
 
 /*
  * OpenWanderer.Navigator class
@@ -13,8 +12,6 @@ const GANav = require('./ganav');
  * Handles navigation to adjacent panoramas; if you click on a panorama you
  * will move to it.
  *
- * Does not yet handle clicks on routes to panoramas.
- *
  * Designed to work with a range of 'sequence providers'. The
  * 'loadSequence' option allows you to specify a function which will
  * return an object containing the sequence(s) that the current panorama 
@@ -26,6 +23,9 @@ const GANav = require('./ganav');
  * in metres) together with a 'panos' property containing an array of panos 
  * along that path (each pano should be an object containing 'panoid',
  * 'lon', 'lat', 'ele' and 'poseheadingdegrees' properties)
+ * 
+ * Contains code created by: 
+ * Eesger Toering / knoop.frl / Project GEO Archive                
  */
 class Navigator {
 
@@ -34,7 +34,6 @@ class Navigator {
         options.api = options.api || { };
         this.loadSequence = options.loadSequence;
         this.viewer = new Viewer(options.element || '#pano');
-        this.gaNav = options.gaNav ? new GANav(this) : null; // use Eesger's new navigation code?
         this.lat = 0.0;
         this.lon = 0.0;
         this.eventHandlers = {};
@@ -45,25 +44,26 @@ class Navigator {
         this.api.panoImg = options.api.panoImg; 
         this.api.panoImgResized = options.api.panoImgResized; 
         this.panoMetadata = { };
-        if(!this.gaNav) {
-            this.viewer.markersPlugin.on("select-marker", async (e, marker, data) => {
+        this.viewer.markersPlugin.on("select-marker", async (e, marker, data) => {
             let id;
             switch(marker.data.type) {
                 case 'path':
-                    alert('Click on path not implemented yet');
+                    let [seqid, idx] = marker.id.split('-').map(n => parseInt(n));
+                    idx = idx < this.curPanoIdx ?  idx: idx+1;
+                    id = this.sequences[seqid].panos[idx].panoid;
                     break;
                 case 'marker':
                     id = parseInt(marker.id.split('-')[2]);
                     break;
             }
             if(id !== undefined) await this.loadPanorama(id);
-            });
-        }
+        });
         this.arrowImage = options.arrowImage || 'images/arrow.png';
+        this.splitPath = options.splitPath || false;
         this.curPanoId = 0;
         this.foundMarkerIds = [];
         this.sequences = [];
-        this.imageNow = 0;
+        this.curPanoIdx = -1;
     }
 
 
@@ -102,10 +102,8 @@ class Navigator {
     }
 
     async _loadMarkers(id) {    
-		console.log(`_loadMarkers: ${id}`);
         this.viewer.markersPlugin.clearMarkers();
         if(!this.panoMetadata[id].sequence) {
-			console.log('loading sequence');
             if(!this.sequences[this.panoMetadata[id].seqid]) {
                 this.sequences[this.panoMetadata[id].seqid] = 
                     await this.loadSequence( 
@@ -130,17 +128,15 @@ class Navigator {
     }
 
    _onLoadedSequence(origPanoId, sequence) {
-		console.log(`onLoadedSequence: origPanoId=${origPanoId}`);
         this.panoMetadata[origPanoId].sequence = sequence;
         sequence.panos.forEach ( (pano, i) => {
-			console.log(`Panoid in sequence ${pano.panoid}`);
             if (!this.panoMetadata[pano.panoid]) {
                 this.panoMetadata[pano.panoid] = Object.assign({
                     seqid: this.panoMetadata[origPanoId].seqid
                 }, pano);
             }
             if(pano.panoid == origPanoId) {
-                this.imageNow = i;
+                this.curPanoIdx = i;
             }
         });    
         this._setPano(origPanoId);
@@ -170,22 +166,76 @@ class Navigator {
     }
 
     _createPaths(id) {
-        if(this.gaNav) {
-            this.gaNav.createPaths(id);
-        } else {
-            this.panoMetadata[id].sequence.panos.forEach ( pano => {
-                pano.key = `marker-${id}-${pano.panoid}`;
-                this.viewer.addMarker([pano.lon, pano.lat, pano.ele], { 
-                    id : pano.key, 
-                    tooltip: `Location of pano ${pano.panoid}` 
-                } );
-            });
-            this.panoMetadata[id].sequence.key = `path-${id}-${this.panoMetadata[id].sequence.seqid}`;
-            this.viewer.addPath(this.panoMetadata[id].sequence.path, { 
-                tooltip: `sequence ${this.panoMetadata[id].sequence.seqid}`, 
-                id: this.panoMetadata[id].sequence.key 
-            });
+        this.panoMetadata[id].sequence.panos.forEach ( pano => {
+            pano.key = `marker-${id}-${pano.panoid}`;
+            this.viewer.addMarker([pano.lon, pano.lat, pano.ele], { 
+                id : pano.key, 
+                tooltip: `Location of pano ${pano.panoid}` 
+            } );
+        });
+        this.panoMetadata[id].sequence.key = `path-${id}-${this.panoMetadata[id].sequence.seqid}`;
+        this.viewer.addPath(this.panoMetadata[id].sequence.path, { 
+            tooltip: `sequence ${this.panoMetadata[id].sequence.seqid}`,
+            id: this.panoMetadata[id].sequence.seqid,
+            degDown: 1,
+            splitPath: this.splitPath,
+        });
+        this.viewer.markersPlugin.on('over-marker', (e, marker) => {
+            this._markerOver(marker.id);
+        });
+            
+        this.viewer.markersPlugin.on('leave-marker', (e, marker) => {
+            this._markerLeave(marker.id);
+        });
+    }
+
+    // Code originally by Eesger Toering; modified
+    _markerOver(markerID) {
+        const marker = this.viewer.markersPlugin.markers[markerID];
+        if (!marker
+            ||  marker.type == 'image'
+            || !marker.config.svgStyle
+            || !marker.config.svgStyle.fill) { 
+            return; 
+         }
+
+         if (this.markerBaseFill === undefined) {
+             this.markerBaseFill = marker.config.svgStyle.fill;
+         }
+         let fillNew = 'url(#GAgradient1)';
+
+  
+         this.viewer.markersPlugin.updateMarker({
+            id   : markerID,
+            svgStyle : {
+                  fill       : fillNew,
+                  stroke     : this.markerBaseFill.replace(/([0-9.]+)\)/, 
+                    (x,y)=> parseFloat(y)/4+')' 
+                   ),
+              strokeWidth: '1px',//'0.1em',
+            },
+         });
+    }
+
+    // Code originally by Eesger Toering; modified
+    _markerLeave(markerID) {  
+        const marker = this.viewer.markersPlugin.markers[markerID];
+  
+        let fillNew = this.markerBaseFill;
+        if (!marker
+            ||  marker.type == 'image'
+            || !marker.config.svgStyle
+            || !marker.config.svgStyle.fill) { 
+            return; 
         }
+
+
+        this.viewer.markersPlugin.updateMarker({
+            id   : markerID,
+            svgStyle : {
+                 fill       : fillNew,
+            },
+        });
     }
 }
 
