@@ -1,4 +1,4 @@
-const Viewer = require('./viewer');
+import Viewer from './viewer.js';
 
 /*
  * OpenWanderer.Navigator class
@@ -239,4 +239,5 @@ class Navigator {
     }
 }
 
-module.exports = Navigator;
+//module.exports = Navigator;
+export default Navigator;

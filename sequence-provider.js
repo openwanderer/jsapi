@@ -28,4 +28,4 @@ class SimpleSequenceProvider {
     }
 }
 
-module.exports = SimpleSequenceProvider;
+export default SimpleSequenceProvider;

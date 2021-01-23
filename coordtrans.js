@@ -303,7 +303,7 @@ function enuPlusMarkerdata(b,dir) {
 
 
 
-module.exports =  {
+export {
     geodeticToEnu, 
     enuToGeodetic, 
     enuPlusMarkerdata,

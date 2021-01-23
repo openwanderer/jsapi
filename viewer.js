@@ -1,4 +1,4 @@
-const coordtrans = require('./coordtrans');
+import { geodeticToEnu, enuPlusMarkerdata } from './coordtrans.js';
 
 /*
  * OpenWanderer.Viewer
@@ -190,7 +190,7 @@ class Viewer {
 
         const projectedCoords = [];
         points.forEach ( point => {
-            let b = coordtrans.geodeticToEnu(point[1], point[0], point[2] === undefined ? -1.5: point[2], this.lat, this.lon, this.elev || 0);
+            let b = geodeticToEnu(point[1], point[0], point[2] === undefined ? -1.5: point[2], this.lat, this.lon, this.elev || 0);
 
             projectedCoords.push([b[0], b[1], b[2]]); 
 
@@ -200,7 +200,7 @@ class Viewer {
                 b[2] -= Math.sin(options.degDown * Math.PI/180) * b[3];
             }
 
-            b = coordtrans.enuPlusMarkerdata(b, this.heading); 
+            b = enuPlusMarkerdata(b, this.heading); 
 
             values.yawPitchDist.push([b[5], b[4], b[3]]);
         });
@@ -222,8 +222,8 @@ class Viewer {
         const polyProj = this._createPathPolygon(projectedCoords, width);
         polyProj.forEach ( p => {
              // Because the polygon coords are in the correct reference frame, this will work...
-            let b = coordtrans.geodeticToEnu(p[1], p[0], p[2] === undefined ? -1.5: p[2], this.lat, this.lon, this.elev || 0);
-            b = coordtrans.enuPlusMarkerdata(p, this.heading);
+            let b = geodeticToEnu(p[1], p[0], p[2] === undefined ? -1.5: p[2], this.lat, this.lon, this.elev || 0);
+            b = enuPlusMarkerdata(p, this.heading);
             path.push([b[5], b[4]]);
         });
         return split ? this._splitPolygon(path) : path;
@@ -313,4 +313,5 @@ class Viewer {
     }
 }
 
-module.exports = Viewer; 
+//module.exports = Viewer; 
+export default Viewer;
