@@ -9,8 +9,8 @@ import { geodeticToEnu, enuPlusMarkerdata } from './coordtrans.js';
  * polylines using real-world longitudes and latitudes, as opposed to 
  * local spherical or pixel coordinates.
  *
- * Depends on photo-sphere-viewer; please install with
- *     npm install
+ * Uses Photo Sphere Viewer (https://photo-sphere-viewer.js.org); this must
+ * be included in your page, either via a CDN or npm installation.
  *
  * In addition to this class's own methods, the methods of the underlying PSV 
  * viewer can be accessed using the 'psv' property.
@@ -26,7 +26,11 @@ class Viewer {
         this.lon = 181;
         this.lat = 91;
         this.elev = 0;
-        this.heading = 0;
+        this.orientation = {
+            pan: 0,
+            tilt: 0,
+            roll: 0
+        };
         this.curMarkerId = 0;
         this.curPathId = 0;
         this.psv = new PhotoSphereViewer.Viewer({
@@ -36,6 +40,11 @@ class Viewer {
             ]
         });
         this.markersPlugin = this.psv.getPlugin(PhotoSphereViewer.MarkersPlugin);
+        this.rotationLimits = {
+            pan: Math.PI,
+            tilt: 0.5 * Math.PI,
+            roll: 0.5 * Math.PI
+        };
     }
 
     /* setLonLat()
@@ -57,34 +66,65 @@ class Viewer {
         this.elev = elev;
     }
 
-    /* setHeading()
+    /* setRotation()
      *
-     * Set the current panorama heading; would typically be provided by
-     * the pano's metadata (returned from an API)
+     * Set the current panorama angle (pan, yaw) or tilt (pitch) / roll; would 
+     * typically be provided by the pano's metadata (returned from an API)
      *
-     * IMPORTANT: Note that the heading is specified in degrees but stored
+     * IMPORTANT: Note that the angle is specified in degrees but stored
      * internally as radians.
      *
-     * Also IMPORTANT: Incorrect results are obtained if the heading is
-     * between 180 and 360. Must be in range -180 -> 0 -> 180. TODO: investigate
-     * why this is.
+     * Also IMPORTANT: Incorrect results are obtained if the angle is
+     * between 180 and 360. Must be in range -180 -> 0 -> 180. 
+     * Now adjusts the angle to ensure it's in this range.
+     *
+     * Note that this does not actually live-rotate an existing panorama.
+     * It's intended to set the angle BEFORE a new panorama is loaded.
+     * Use rotate(), below, to live-rotate an existing pano.
      */
-    setHeading(heading) {
-        this.heading = heading * Math.PI / 180.0;
+    setRotation(angle, component='pan') {
+        this._doSetRotation(angle * (Math.PI / 180.0), component);
+    }
+
+    /* _doSetRotation()
+     *
+     * Sets the angle in radians, ensuring it's between appropriate limits.
+     */
+
+    _doSetRotation(angleRad, component='pan') {
+        this.orientation[component] = angleRad;
+        if (this.orientation[component] > this.rotationLimits[component]) this.orientation[component] -= this.rotationLimits[component]*2;
+        if (this.orientation[component] < -this.rotationLimits[component]) this.orientation[component] += this.rotationLimits[component]*2;
     }
 
     /* setPanorama()
      *
      * Set the current panorama by calling the PSV Viewer's setPanorama();
-     * ensures that the sphere correction is equal to the current heading, 
+     * ensures that the sphere correction is equal to current pan/tilt/roll, 
      * allowing the panorama to be corrected by the correct amount. 
      *
      * Returns: the Promise returned by the PSV Viewer's setPanorama(). 
      */
     setPanorama(panorama) {
         return this.psv.setPanorama(panorama, {
-            sphereCorrection: { pan: -this.heading }
+            sphereCorrection: { 
+                pan: -this.orientation.pan,
+                tilt: -this.orientation.tilt,
+                roll: -this.orientation.roll,
+            }
         });
+    }
+
+    /* rotate()
+     *
+     * Rotates the current panorama by the given angle (either pan, tilt, roll)
+     *
+     * Sets the orientation attribute and changes the sphereCorrection option
+     * of the underlying PSV viewer.
+     */
+    rotate(diff, component='pan') {
+        this._doSetRotation(this.orientation[component] + diff*(Math.PI/180), component);
+        this.psv.setOption('sphereCorrection', { pan: -this.orientation.pan, tilt: -this.orientation.tilt, roll: -this.orientation.roll } );
     }
 
     /* addMarker()
@@ -200,7 +240,7 @@ class Viewer {
                 b[2] -= Math.sin(options.degDown * Math.PI/180) * b[3];
             }
 
-            b = enuPlusMarkerdata(b, this.heading); 
+            b = enuPlusMarkerdata(b, this.orientation.pan); 
 
             values.yawPitchDist.push([b[5], b[4], b[3]]);
         });
@@ -223,7 +263,7 @@ class Viewer {
         polyProj.forEach ( p => {
              // Because the polygon coords are in the correct reference frame, this will work...
             let b = geodeticToEnu(p[1], p[0], p[2] === undefined ? -1.5: p[2], this.lat, this.lon, this.elev || 0);
-            b = enuPlusMarkerdata(p, this.heading);
+            b = enuPlusMarkerdata(p, this.orientation.pan);
             path.push([b[5], b[4]]);
         });
         return split ? this._splitPolygon(path) : path;
@@ -313,5 +353,4 @@ class Viewer {
     }
 }
 
-//module.exports = Viewer; 
 export default Viewer;

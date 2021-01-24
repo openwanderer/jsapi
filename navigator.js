@@ -22,8 +22,8 @@ import Viewer from './viewer.js';
  * should be an array containing actual WGS84 coords together with elevation 
  * in metres) together with a 'panos' property containing an array of panos 
  * along that path (each pano should be an object containing 'panoid',
- * 'lon', 'lat', 'ele' and 'poseheadingdegrees' properties)
- * 
+ * 'lon', 'lat', 'ele', 'pan' and optional 'tilt' and 'roll' properties)
+ *
  * Contains code created by: 
  * Eesger Toering / knoop.frl / Project GEO Archive                
  */
@@ -81,11 +81,13 @@ class Navigator {
         } 
 
 
-        const heading = this.panoMetadata[id].poseheadingdegrees > 180 ? 
-            this.panoMetadata[id].poseheadingdegrees - 360 : 
-            this.panoMetadata[id].poseheadingdegrees;
+        const pan = this.panoMetadata[id].pan || 0;
+        const tilt = this.panoMetadata[id].tilt || 0;
+        const roll = this.panoMetadata[id].roll || 0;
 
-        this.viewer.setHeading(heading);
+        this.viewer.setRotation(pan, 'pan');
+        this.viewer.setRotation(tilt, 'tilt');
+        this.viewer.setRotation(roll, 'roll');
         this.viewer.setPanorama(
             this.resizePano === undefined ? 
                 this.api.panoImg.replace('{id}', id) : 
