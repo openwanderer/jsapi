@@ -24,8 +24,10 @@ import Viewer from './viewer.js';
  * along that path (each pano should be an object containing 'panoid',
  * 'lon', 'lat', 'ele', 'pan' and optional 'tilt' and 'roll' properties)
  *
- * Contains code created by: 
+ * Contains code (explicitly marked) created by: 
  * Eesger Toering / knoop.frl / Project GEO Archive                
+ *
+ * Other code created by Nick Whitelegg (@nickw1 github)
  */
 class Navigator {
 
@@ -44,6 +46,7 @@ class Navigator {
         this.api.panoImg = options.api.panoImg; 
         this.api.panoImgResized = options.api.panoImgResized; 
         this.panoMetadata = { };
+        this.svgEffects = options.svgEffects === undefined ? true: options.svgEffects;
         this.viewer.markersPlugin.on("select-marker", async (e, marker, data) => {
             let id;
             switch(marker.data.type) {
@@ -58,12 +61,47 @@ class Navigator {
             }
             if(id !== undefined) await this.loadPanorama(id);
         });
-        this.arrowImage = options.arrowImage || 'images/arrow.png';
         this.splitPath = options.splitPath || false;
         this.curPanoId = 0;
         this.foundMarkerIds = [];
         this.sequences = [];
         this.curPanoIdx = -1;
+
+        // SVG was developed by Eesger Toering
+        if(this.svgEffects) {
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttributeNS(null, 'height', 1);
+            svg.setAttributeNS(null, 'width', 1);
+            svg.style.position = 'absolute';
+            svg.style.top = '-1px';
+            svg.style.left = '-1px';
+            svg.innerHTML = '<defs>' +
+                '<radialGradient id="GAgradient1" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">' +
+                ' <stop offset="0%" stop-color="rgba(255, 255, 255, 1.0)"/>'+
+                ' <stop offset="25%"  stop-color="rgba(255, 255, 255, 1.0)"/>' +
+                ' <stop offset="100%" stop-color="rgba(255, 255, 255, 0.4)"/>'+
+                ' </radialGradient>' +
+                ' <radialGradient id="GAgradient0" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">' +
+                ' <stop offset="0%"   stop-color="rgba(255, 255, 255, 0.5)"/>' +
+                ' <stop offset="100%" stop-color="rgba(255, 255, 255, 0.5)"/>' +
+                ' </radialGradient>' +
+                '<linearGradient id="GAgradient0T" x2="0" y2="1">' +
+                '<stop offset="0%"   stop-color="rgba(255, 255, 255, 0.35)"/>' +
+                ' <stop offset="100%" stop-color="rgba(255, 255, 255, 0.35)"/>' +
+                ' </linearGradient>' +
+                '<linearGradient id="GAgradient2T" x2="0" y2="1">' +
+                '<stop offset="0%"   stop-color="rgba(255, 255, 255, 0.35)"/>' +
+                ' <stop offset="10%"  stop-color="rgba(255, 255, 255, 0.35)"/>' +            
+                ' <stop offset="100%" stop-color="rgba(255, 255, 255, 0.85)"/>'+
+                ' </linearGradient>' +
+                ' <linearGradient id="GAgradient3T" x2="0" y2="1">' +
+                '<stop offset="0%"   stop-color="rgba(255, 255, 255, 0.85)"/>' +
+                '<stop offset="90%"  stop-color="rgba(255, 255, 255, 0.35)"/>' +
+                '<stop offset="100%" stop-color="rgba(255, 255, 255, 0.35)"/>' +
+                '</linearGradient>' +
+                '</defs>';
+            document.body.appendChild(svg);
+        }
     }
 
 
@@ -193,6 +231,8 @@ class Navigator {
 
     // Code originally by Eesger Toering; modified
     _markerOver(markerID) {
+        if (!this.svgEffects) return;
+
         const marker = this.viewer.markersPlugin.markers[markerID];
         if (!marker
             ||  marker.type == 'image'
@@ -221,6 +261,8 @@ class Navigator {
 
     // Code originally by Eesger Toering; modified
     _markerLeave(markerID) {  
+        if (!this.svgEffects) return;
+
         const marker = this.viewer.markersPlugin.markers[markerID];
   
         let fillNew = this.markerBaseFill;
