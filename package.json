@@ -1,0 +1,17 @@
+{
+    "name": "openwanderer-jsapi",
+    "version": "0.0.1",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/openwanderer/jsapi"
+    },
+    "description": "OpenWanderer is a project to produce a 100% free and open source panoramas platform.",
+    "license": "LGPL-3.0-or-later",
+    "keywords": [
+        "panorama",
+        "360",
+        "free",
+        "open source",
+        "FOSS"
+    ]
+}
