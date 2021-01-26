@@ -281,6 +281,21 @@ class Navigator {
             },
         });
     }
+
+    async update(id, properties) {
+        if(this.panoMetadata[id]) {
+            if(properties.position) {
+                this.panoMetadata[id].lon = properties.position[0];
+                this.panoMetadata[id].lat = properties.position[1];
+            } else if (properties.pan) {
+                this.panoMetadata[id].pan = properties.pan;
+            }
+
+            if(this.curPanoId == id) {    
+                await this.loadPanorama(id);
+            }
+        }
+    }
 }
 
 //module.exports = Navigator;
