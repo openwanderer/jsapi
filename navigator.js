@@ -77,27 +77,27 @@ class Navigator {
             svg.style.left = '-1px';
             svg.innerHTML = '<defs>' +
                 '<radialGradient id="GAgradient1" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">' +
-                ' <stop offset="0%" stop-color="rgba(255, 255, 255, 1.0)"/>'+
-                ' <stop offset="25%"  stop-color="rgba(255, 255, 255, 1.0)"/>' +
-                ' <stop offset="100%" stop-color="rgba(255, 255, 255, 0.4)"/>'+
+                ' <stop offset="0%" stop-color="rgba(255, 255, 0, 1.0)"/>'+
+                ' <stop offset="25%"  stop-color="rgba(255, 255, 0, 1.0)"/>' +
+                ' <stop offset="100%" stop-color="rgba(255, 255, 0, 0.4)"/>'+
                 ' </radialGradient>' +
                 ' <radialGradient id="GAgradient0" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">' +
-                ' <stop offset="0%"   stop-color="rgba(255, 255, 255, 0.5)"/>' +
-                ' <stop offset="100%" stop-color="rgba(255, 255, 255, 0.5)"/>' +
+                ' <stop offset="0%"   stop-color="rgba(255, 255, 0, 0.5)"/>' +
+                ' <stop offset="100%" stop-color="rgba(255, 255, 0, 0.5)"/>' +
                 ' </radialGradient>' +
                 '<linearGradient id="GAgradient0T" x2="0" y2="1">' +
-                '<stop offset="0%"   stop-color="rgba(255, 255, 255, 0.35)"/>' +
-                ' <stop offset="100%" stop-color="rgba(255, 255, 255, 0.35)"/>' +
+                '<stop offset="0%"   stop-color="rgba(255, 255, 0, 0.35)"/>' +
+                ' <stop offset="100%" stop-color="rgba(255, 255, 0, 0.35)"/>' +
                 ' </linearGradient>' +
                 '<linearGradient id="GAgradient2T" x2="0" y2="1">' +
-                '<stop offset="0%"   stop-color="rgba(255, 255, 255, 0.35)"/>' +
-                ' <stop offset="10%"  stop-color="rgba(255, 255, 255, 0.35)"/>' +            
-                ' <stop offset="100%" stop-color="rgba(255, 255, 255, 0.85)"/>'+
+                '<stop offset="0%"   stop-color="rgba(255, 255, 0, 0.35)"/>' +
+                ' <stop offset="10%"  stop-color="rgba(255, 255, 0, 0.35)"/>' +            
+                ' <stop offset="100%" stop-color="rgba(255, 255, 0, 0.85)"/>'+
                 ' </linearGradient>' +
                 ' <linearGradient id="GAgradient3T" x2="0" y2="1">' +
-                '<stop offset="0%"   stop-color="rgba(255, 255, 255, 0.85)"/>' +
-                '<stop offset="90%"  stop-color="rgba(255, 255, 255, 0.35)"/>' +
-                '<stop offset="100%" stop-color="rgba(255, 255, 255, 0.35)"/>' +
+                '<stop offset="0%"   stop-color="rgba(255, 255, 0, 0.85)"/>' +
+                '<stop offset="90%"  stop-color="rgba(255, 255, 0, 0.35)"/>' +
+                '<stop offset="100%" stop-color="rgba(255, 255, 0, 0.35)"/>' +
                 '</linearGradient>' +
                 '</defs>';
             document.body.appendChild(svg);

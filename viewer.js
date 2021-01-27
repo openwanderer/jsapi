@@ -150,8 +150,8 @@ class Viewer {
            // source for path: https://commons.wikimedia.org/wiki/File:Map_marker.svg
           path       : options.path || 'M182.9,551.7c0,0.1,0.2,0.3,0.2,0.3S358.3,283,358.3,194.6c0-130.1-88.8-186.7-175.4-186.9 C96.3,7.9,7.5,64.5,7.5,194.6c0,88.4,175.3,357.4,175.3,357.4S182.9,551.7,182.9,551.7z M122.2,187.2c0-33.6,27.2-60.8,60.8-60.8 c33.6,0,60.8,27.2,60.8,60.8S216.5,248,182.9,248C149.4,248,122.2,220.8,122.2,187.2z',
           svgStyle:  {
-            fill       : options.fill || 'rgba(255, 255, 255, 0.4)',
-            stroke     : options.stroke || 'rgb(255, 255, 255, 1.0)',
+            fill       : options.fill || 'rgba(255, 255, 0, 0.4)',
+            stroke     : options.stroke || 'rgb(255, 255, 0, 1.0)',
             strokeWidth: options.strokeWidth || '2px'
           },
           anchor     : '52% 102%',
@@ -180,8 +180,8 @@ class Viewer {
                     id: `${id}-${i}`,
                     polylineRad: polygon, 
                     svgStyle: {
-                        fill: options.fill || 'rgba(255, 255, 255, 0.4)',
-                        stroke: options.stroke || 'rgba(255, 255, 255, 1.0)',
+                        fill: options.fill || 'rgba(255, 255, 0, 0.4)',
+                        stroke: options.stroke || 'rgba(255, 255, 0, 1.0)',
                     },
                     tooltip: `Sequence ${id}`,
                     data: {
@@ -194,8 +194,8 @@ class Viewer {
                 id: id,
                 polylineRad: sphericalCoords.path,
                 svgStyle: {
-                    fill: options.fill || 'rgba(255, 255, 255, 0.4)',
-                    stroke: options.stroke || 'rgba(255, 255, 255, 1.0)',
+                    fill: options.fill || 'rgba(255, 255, 0, 0.4)',
+                    stroke: options.stroke || 'rgba(255, 255, 0, 1.0)',
                 },
                 tooltip: options.tooltip || 'Path',
                 data: {
