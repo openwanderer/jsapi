@@ -29,6 +29,16 @@ import Viewer from './viewer.js';
  *
  * Other code created by Nick Whitelegg (@nickw1 github)
  */
+
+/* Changelog:
+ *
+ * v0.0.3 (22/02/21) - add 'panoTransFunc' option to allow specification of
+ * a panorama transition function (to allow transition effects, such as 
+ * Eesger's transitions). This function should return a promise, resolving
+ * if the transition completed successfully.
+ *
+ */
+
 class Navigator {
 
     constructor(options) {
@@ -47,6 +57,7 @@ class Navigator {
         this.api.panoImgResized = options.api.panoImgResized; 
         this.panoMetadata = { };
         this.svgEffects = options.svgEffects === undefined ? true: options.svgEffects;
+        this.panoTransFunc = options.panoTransFunc || null;
         this.viewer.markersPlugin.on("select-marker", async (e, marker, data) => {
             let id;
             switch(marker.data.type) {
@@ -126,15 +137,25 @@ class Navigator {
         this.viewer.setRotation(pan, 'pan');
         this.viewer.setRotation(tilt, 'tilt');
         this.viewer.setRotation(roll, 'roll');
-        this.viewer.setPanorama(
-            this.resizePano === undefined ? 
-                this.api.panoImg.replace('{id}', id) : 
-                this.api.panoImgResized
-                    .replace('{id}', id)
-                    .replace('{width}', this.resizePano)
-        ).then( () => { 
-            this._loadMarkers(id);
-        });
+        
+        
+        
+        // the camera is null the first time it loads
+        if(this.viewer.psv.renderer.camera !== null && this.panoTransFunc) {
+            this.panoTransFunc(this, id).then( ()=> {
+                this._loadMarkers(id)
+            });
+        } else {
+            this.viewer.setPanorama(
+                this.resizePano === undefined ? 
+                    this.api.panoImg.replace('{id}', id) : 
+                    this.api.panoImgResized
+                        .replace('{id}', id)
+                        .replace('{width}', this.resizePano)
+            ).then( () => { 
+                this._loadMarkers(id);
+            });
+        }
     }
 
     on(evName,evHandler) {
