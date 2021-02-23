@@ -8,7 +8,7 @@
         "type": "git",
         "url": "https://github.com/openwanderer/jsapi"
     },
-    "description": "OpenWanderer is a project to produce a 100% free and open source panoramas platform. This addon to the main JavaScript API adds transition effects between panoramas.",
+    "description": "OpenWanderer is a project to produce a 100% free and open source panoramas platform. This addon to the main JavaScript API adds transition effects between panoramas. Transition code written by Eesger Toering, adapted by nickw to integrate with OpenWanderer jsapi core.",
     "license": "LGPL-3.0-or-later",
     "keywords": [
         "panorama",
