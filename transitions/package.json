@@ -1,0 +1,20 @@
+{
+    "name": "openwanderer-jsapi-transitions",
+    "dependencies": {
+        "jquery": "^3.5.1"
+    },
+    "version": "0.0.1",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/openwanderer/jsapi"
+    },
+    "description": "OpenWanderer is a project to produce a 100% free and open source panoramas platform. This addon to the main JavaScript API adds transition effects between panoramas.",
+    "license": "LGPL-3.0-or-later",
+    "keywords": [
+        "panorama",
+        "360",
+        "free",
+        "open source",
+        "FOSS"
+    ]
+}
