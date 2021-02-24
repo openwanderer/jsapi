@@ -22,11 +22,11 @@ const Transition  = {
     markerBaseFill: 'rgba(255, 255, 0, 0.4)',
     imageDelay: {
          time    : 1500, // transition time (it is in two parts, thus total transition is twice as long)
-          timeMin : 1500, // transition time (it is in two parts, thus total transition is twice as long)
-          count   : 0,    // counter for time calculation based upon image loading time (0-9)
-          timer   : 0,    // for loading time calculation
-          ease    : 1
-    }, // manipulate animation factor | 1 = default/safe, higher=slower, lower=faster (below 0.5 will guarantee flickering / 0=error!)
+         timeMin : 1500, // transition time (it is in two parts, thus total transition is twice as long)
+         count   : 0,    // counter for time calculation based upon image loading time (0-9)
+         timer   : 0,    // for loading time calculation
+         ease    : 1     // manipulate animation factor | 1 = default/safe, higher=slower, lower=faster (below 0.5 will guarantee flickering / 0=error!)
+    },
 
 
     // dynamically add the required CSS (from Eesger) to the page
@@ -173,11 +173,8 @@ const Transition  = {
         if (this.psv.config.fisheye) {
             scale = 1;
         } else if (pos.y < 0 // go back!!
-            || pos.y/this.psv.container.offsetHeight*5 < 
-            pos.h/this.psv.container.offsetHeight 
-            // one would exect only negative.. but not so..
-               || pos.y > this.psv.container.offsetHeight*2 
-            // one would exect only negative.. but not so..
+            || pos.y/this.psv.container.offsetHeight*5 < pos.h/this.psv.container.offsetHeight  // one would exect only negative.. but not so..
+            || pos.y > this.psv.container.offsetHeight*2 // one would exect only negative.. but not so..
         ) {
             scale = 0.95;
             animateLeft = (100-(scale*100))/2;
@@ -198,7 +195,7 @@ const Transition  = {
 
         // first I tried to use CSS transitions.. but the effect was 
         // not smooth. Cause proved to be the loading and rendering of 
-        //the new pano animate position and zoom for optical effect 
+        // the new pano animate position and zoom for optical effect 
         // moving to next image
         $('#GA'+this.container.id+'Transition').animate({
               'left'      : animateLeft+'%',
@@ -217,17 +214,17 @@ const Transition  = {
                 { transition:false,
                     showLoader:false
             }).then(() => {
-                  // use loading time of panorame for better timed animation
+                // use loading time of panorama for better timed animation
                 let delayTime = new Date();
                 let timer = ((delayTime.getHours()*60+delayTime.getMinutes())*60+delayTime.getSeconds())*1000+delayTime.getMilliseconds();
-                // a minimum impact of 10% of the loading time
+                // a minimum impact of 10% of the latest loading time
                 this.imageDelay.count+= (this.imageDelay.count < 9) ? 1 : 0;
                 if (this.imageDelay.count == 1) {
                     this.imageDelay.time = timer - this.imageDelay.timer;
                 } else {
                     this.imageDelay.time = (this.imageDelay.time*this.imageDelay.count + (timer - this.imageDelay.timer))/(this.imageDelay.count+1);
                 }
-                // a minimum time of one second
+                // a minimum time of..
                 if (this.imageDelay.time<this.imageDelay.timeMin) { 
                     this.imageDelay.time = this.imageDelay.timeMin; 
                 }
@@ -262,7 +259,7 @@ const Transition  = {
     _animationSecondStage: function() {
         return new Promise((resolve, reject) => {
             // fade out to next image done on the containing images, 
-            // NOT the container, less smoth (conflict with first animation..?)
+            // NOT the container, less smooth (conflict with first animation..?)
             $('#GA'+this.container.id+'Transition img').animate({
                    'opacity'   : '0'
                 },
