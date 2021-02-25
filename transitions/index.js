@@ -140,7 +140,7 @@ const Transition  = {
                 .first()
                 .append('<div id="GA'+this.container.id+'Transition" class="GATransition" style="position:absolute;top:0;left:0;width:100%;height:100%;">'+
         '<img id="GA'+this.container.id+'TransitionCanvas"  class="GATransitionCanvas" src="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==">'+
-//    NW MARKERS COMMENTED OUT FOR NOW    '<img id="GA'+container.id+'TransitionMarkers" class="GATransitionCanvas" src="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==">'+
+                 '<img id="GA'+this.container.id+'TransitionMarkers" class="GATransitionCanvas" src="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==">'+
                   '</div>');
 
             // copy source Canvas for animation
@@ -151,7 +151,7 @@ const Transition  = {
                 this.psv.renderer.renderer.domElement.toDataURL() + ')');
 
             // copy markers SVG (only!) for animation (and remove gradients)
-            // NW MARKERS COMMENTED OUT FOR NOW  $('#GA'+container.id+'TransitionMarkers').attr('src', 'data:image/svg+xml;base64,'+ btoa($('#'+container.id).find('.psv-markers').first().html().replace(/^.*?<svg /, '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+.psv.container.offsetWidth+' '+.psv.container.offsetHeight+'" ') .replace(/url\(\#GAgradient[0-9]\)/g, this.markerBaseFill) .replace(/\/svg>.*$/, '/svg>')));
+            $('#GA'+this.container.id+'TransitionMarkers').attr('src', 'data:image/svg+xml;base64,'+ btoa($('#'+this.container.id).find('.psv-markers').first().html().replace(/^.*?<svg /, '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+this.psv.container.offsetWidth+' '+this.psv.container.offsetHeight+'" ') .replace(/url\(\#GAgradient[0-9]\)/g, this.markerBaseFill) .replace(/\/svg>.*$/, '/svg>')));
 
             // create a separate thread for the first step of the animation
             setTimeout(this._animationFirstStage.bind(this, pos, scale), 100);
@@ -180,7 +180,7 @@ const Transition  = {
             animateLeft = (100-(scale*100))/2;
             $('#GA'+this.container.id+'Transition').addClass('GAborderfade1');
             $('#GA'+this.container.id+'TransitionCanvas').addClass('GAborderfade2');
-            // NW MARKERS COMMENTED OUT FOR NOW                    $('#GA'+container.id+'TransitionMarkers').addClass('GAborderfade2');
+            $('#GA'+this.container.id+'TransitionMarkers').addClass('GAborderfade2');
         } else {
             // factor in difference in viewing direction 
             // (when available, work in progress, 
@@ -237,14 +237,15 @@ const Transition  = {
                 // (otherwise the markers tend to "jump around")
                 let markertimer = this.imageDelay.time*(2/3);
                 if (markertimer < 700) { markertimer = 700; }
-                // NW MARKERS COMMENTED OUT FOR NOW                  setTimeout(() => { loadMarkers(); },markertimer);
+                setTimeout(() => { resolve(); },markertimer);
 
                 // second stage of the animation
                 console.log('Second stage of animation...');
                 if ($('#GA'+this.container.id+'Transition').length) {
                 // in a seperate thread (otherwise the markers flicker)
                     setTimeout(() => {
-                        this._animationSecondStage().then(resolve);
+                        //this._animationSecondStage().then(resolve);
+                        this._animationSecondStage();
                     }, this.imageDelay.time * this.imageDelay.ease * 0.1);
                 } else {
                     console.log('No transition');
