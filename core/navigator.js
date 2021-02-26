@@ -12,17 +12,20 @@ import Viewer from './viewer.js';
  * Handles navigation to adjacent panoramas; if you click on a panorama you
  * will move to it.
  *
- * Designed to work with a range of 'sequence providers'. The
- * 'loadSequence' option allows you to specify a function which will
- * return an object containing the sequence(s) that the current panorama 
- * belongs to.
+ * Sequence loading behaviour has changed from v0.0.4. 
+ * You can now either provide a static pano sequence, or a function which
+ * downloads data from an API. Either is specified through the 'sequence'
+ * option.
  *
- * It should return the sequence that the panorama belongs to. 
- * Each sequence should have a 'path' property (array of points: each point 
- * should be an array containing actual WGS84 coords together with elevation 
- * in metres) together with a 'panos' property containing an array of panos 
- * along that path (each pano should be an object containing 'panoid',
- * 'lon', 'lat', 'ele', 'pan' and optional 'tilt' and 'roll' properties)
+ * The static pano sequence should be an array of objects making up the
+ * sequence. Each pano should be an object containing 'panoid', 'lon', 'lat',
+ * 'ele', 'pan' and optional 'tilt' and 'roll' properties.
+ *
+ * The function should return an object containing these properties:
+ * - seqid: the sequence ID (this would typically be provided by an API)
+ * - panos: an array of objects representing each pano, with each object
+ *   containing 'panoid', 'lon', 'lat', 'ele', 'pan' and optional 'tilt' and
+ *  'roll' properties, as above (again these would be provided by an API)
  *
  * Contains code (explicitly marked) created by: 
  * Eesger Toering / knoop.frl / Project GEO Archive                
@@ -31,6 +34,8 @@ import Viewer from './viewer.js';
  */
 
 /* Changelog:
+ *
+ * v0.0.4 (26/02/21) - sequence loading behavior changed, as described above.
  *
  * v0.0.3 (22/02/21) - add 'panoTransFunc' option to allow specification of
  * a panorama transition function (to allow transition effects, such as 
@@ -44,7 +49,15 @@ class Navigator {
     constructor(options) {
         options = options || { };
         options.api = options.api || { };
-        this.loadSequence = options.loadSequence;
+        this.sequences = [];
+        this.panoMetadata = { };
+
+        if(options.sequence instanceof Function){
+            this.loadSequence = options.sequence;
+        } else if (options.sequence instanceof Array) {
+            this.addSequence(1, options.sequence);
+        } 
+        
         this.viewer = new Viewer(options.element || '#pano');
         this.lat = 0.0;
         this.lon = 0.0;
@@ -55,7 +68,6 @@ class Navigator {
         this.api.byId = options.api.byId;  
         this.api.panoImg = options.api.panoImg; 
         this.api.panoImgResized = options.api.panoImgResized; 
-        this.panoMetadata = { };
         this.svgEffects = options.svgEffects === undefined ? true: options.svgEffects;
         this.panoTransFunc = options.panoTransFunc || null;
         this.viewer.markersPlugin.on("select-marker", async (e, marker, data) => {
@@ -75,7 +87,6 @@ class Navigator {
         this.splitPath = options.splitPath || false;
         this.curPanoId = 0;
         this.foundMarkerIds = [];
-        this.sequences = [];
         this.curPanoIdx = -1;
 
         // SVG was developed by Eesger Toering
@@ -129,7 +140,6 @@ class Navigator {
              await this._loadPanoMetadata(id);
         } 
 
-
         const pan = this.panoMetadata[id].pan || 0;
         const tilt = this.panoMetadata[id].tilt || 0;
         const roll = this.panoMetadata[id].roll || 0;
@@ -164,7 +174,8 @@ class Navigator {
 
     async _loadMarkers(id) {    
         this.viewer.markersPlugin.clearMarkers();
-        if(!this.panoMetadata[id].sequence) {
+        if(!this.panoMetadata[id]) {
+        } else if(!this.panoMetadata[id].sequence) {
             if(!this.sequences[this.panoMetadata[id].seqid]) {
                 this.sequences[this.panoMetadata[id].seqid] = 
                     await this.loadSequence( 
@@ -176,6 +187,7 @@ class Navigator {
                 this.sequences[this.panoMetadata[id].seqid]
             );
         } else {
+            this.curPanoId = id;
             this._setPano(id);
         }
     }
@@ -183,35 +195,45 @@ class Navigator {
 
     async _loadPanoMetadata(id) {
         this.panoMetadata[id] = await fetch(this.api.byId.replace('{id}', id))
-                                .then(response => response.json());
+            .then(response => response.json());
         this.panoMetadata[id].ele = parseFloat(this.panoMetadata[id].ele);
         return this.panoMetadata[id];
     }
 
    _onLoadedSequence(origPanoId, sequence) {
         this.panoMetadata[origPanoId].sequence = sequence;
+        this.curPanoId = origPanoId;
+        this._doSetupSequence(sequence);
+        this._setPano(origPanoId);
+    }
+    
+    addSequence(seqid, sequence) {
+        this.sequences[seqid] = { 'seqid': seqid, "panos": sequence };
+        this._doSetupSequence(this.sequences[seqid]);
+    }
+
+    _doSetupSequence(sequence) {
         sequence.panos.forEach ( (pano, i) => {
             if (!this.panoMetadata[pano.panoid]) {
                 this.panoMetadata[pano.panoid] = Object.assign({
-                    seqid: this.panoMetadata[origPanoId].seqid
+                    seqid: /*this.panoMetadata[origPanoId].*/sequence.seqid
                 }, pano);
             }
-            if(pano.panoid == origPanoId) {
+            if(pano.panoid == this.curPanoId) {
                 this.curPanoIdx = i;
             }
         });    
-        this._setPano(origPanoId);
     }
 
     _setPano(id) { 
-        this._setPanoId(id);
+        this._emitPanoChangeEvents(id);
         this.viewer.setLonLat(this.panoMetadata[id].lon, this.panoMetadata[id].lat);
         this.viewer.setElevation(this.panoMetadata[id].ele + 1.5);
         //this.viewer.setElevation(1.5);
         this._createPaths(id);
     }
 
-    _setPanoId(id) {
+    _emitPanoChangeEvents(id) {
         this.curPanoId = id;
 
         if(this.eventHandlers.panoChanged) {
@@ -227,6 +249,7 @@ class Navigator {
     }
 
     _createPaths(id) {
+        const path = this.panoMetadata[id].sequence.panos.map ( pano => [pano.lon, pano.lat, parseFloat(pano.ele)] );
         this.panoMetadata[id].sequence.panos.forEach ( pano => {
             pano.key = `marker-${id}-${pano.panoid}`;
             this.viewer.addMarker([pano.lon, pano.lat, pano.ele], { 
@@ -235,7 +258,7 @@ class Navigator {
             } );
         });
         this.panoMetadata[id].sequence.key = `path-${id}-${this.panoMetadata[id].sequence.seqid}`;
-        this.viewer.addPath(this.panoMetadata[id].sequence.path, { 
+        this.viewer.addPath(path, { 
             tooltip: `sequence ${this.panoMetadata[id].sequence.seqid}`,
             id: this.panoMetadata[id].sequence.seqid,
             degDown: 1,

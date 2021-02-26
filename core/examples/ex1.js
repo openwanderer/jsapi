@@ -1,4 +1,11 @@
-import * as OpenWanderer from '../index.js';
+/*
+ *
+ * Example 1
+ * 
+ * Simple usage of OpenWanderer.Viewer.
+ *
+ */ 
+import OpenWanderer from '../index.js';
 
 const viewer = new OpenWanderer.Viewer('#pano');
 
@@ -11,7 +18,7 @@ viewer.setElevation(126);
 // Specify the heading (yaw, poseheadingdegrees) of the panorama we will load.
 // Important! For an unknown reason as yet, values between 180 and 360 do not
 // appear to work correctly. Has to be in range -180 -> 0 -> 180.
-viewer.setHeading(3);
+viewer.setRotation(3);
 
 // Load the panorama, then add markers.
 viewer.setPanorama('images/1200.jpg').then ( () => {
