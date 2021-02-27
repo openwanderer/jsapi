@@ -10,14 +10,12 @@ import OpenWanderer from '../index.js';
 
 const navigator = new OpenWanderer.Navigator({
     element: '#pano',    
-    api: {
-        panoImg: 'images/{id}.jpg', // path to images, {id} will be replaced by the pano ID in the sequence.
-    },
     // The sequence is an array of objects with the properties for each
     // image. To work correctely, all these properties must be specified.
     sequence: 
          [{
-              "panoid":8,
+              "panoid":1,
+              "image": 'images/8.jpg',
               "lon":"-1.4116138888889",
               "lat":"50.9347",
               "ele":58,
@@ -25,7 +23,8 @@ const navigator = new OpenWanderer.Navigator({
               "roll":0,
               "pan":-178
             },{ 
-              "panoid":10,
+              "panoid":2,
+              "image": 'images/10.jpg',
               "lon":"-1.4115071296692",
               "lat":"50.934328480366",
               "ele":56,
@@ -33,7 +32,8 @@ const navigator = new OpenWanderer.Navigator({
               "roll":0,
               "pan":175
             },{
-              "panoid":11,
+              "panoid":3,
+              "image": 'images/11.jpg',
               "lon":"-1.4114320278168",
               "lat":"50.933888985495",
               "ele":55,
@@ -41,7 +41,8 @@ const navigator = new OpenWanderer.Navigator({
               "roll":0,
               "pan":170
             },{
-              "panoid":12,
+              "panoid":4,
+               "image": 'images/12.jpg',
                "lon":"-1.4115822441333",
                "lat":"50.9334292018",
                "ele":53,
@@ -52,4 +53,4 @@ const navigator = new OpenWanderer.Navigator({
 });
 
 // Move to a specific panorama by ID.
-navigator.loadPanorama(8);
+navigator.loadPanorama(1);

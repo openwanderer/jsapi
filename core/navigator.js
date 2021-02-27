@@ -19,7 +19,9 @@ import Viewer from './viewer.js';
  *
  * The static pano sequence should be an array of objects making up the
  * sequence. Each pano should be an object containing 'panoid', 'lon', 'lat',
- * 'ele', 'pan' and optional 'tilt' and 'roll' properties.
+ * 'ele', 'pan' and optional 'tilt' and 'roll' properties, as well as an 
+ * optional 'image' property for the image itself (otherwise the panoImg API
+ * setting with the image ID is used to work out which image to use)
  *
  * The function should return an object containing these properties:
  * - seqid: the sequence ID (this would typically be provided by an API)
@@ -34,6 +36,9 @@ import Viewer from './viewer.js';
  */
 
 /* Changelog:
+ *
+ * v0.0.5 (27/02/21) - can specify 'image' property in pano JSON for sequences,
+ * allowing use of arbitrary images (filename does not need to match image ID)
  *
  * v0.0.4 (26/02/21) - sequence loading behavior changed, as described above.
  *
@@ -158,7 +163,7 @@ class Navigator {
         } else {
             this.viewer.setPanorama(
                 this.resizePano === undefined ? 
-                    this.api.panoImg.replace('{id}', id) : 
+                    this.panoMetadata[id].image || this.api.panoImg.replace('{id}', id) : 
                     this.api.panoImgResized
                         .replace('{id}', id)
                         .replace('{width}', this.resizePano)
