@@ -157,7 +157,7 @@ class Navigator {
         
         // the camera is null the first time it loads
         if(this.viewer.psv.renderer.camera !== null && this.panoTransFunc) {
-            this.panoTransFunc(this, id).then( ()=> {
+            this.panoTransFunc(this, id, { pan: pan*(Math.PI/180), tilt: tilt*(Math.PI/180), roll: roll*(Math.PI/180) } ).then( ()=> {
                 this._loadMarkers(id)
             });
         } else {

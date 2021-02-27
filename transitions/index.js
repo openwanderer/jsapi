@@ -1,4 +1,4 @@
-import '../jquery/dist/jquery.min.js'
+//import '../jquery/dist/jquery.min.js'
 
 /*
  * This code is Eesger Toering's transitions code, adapted to "plug in" to the
@@ -68,8 +68,9 @@ const Transition  = {
     // go to a given panorama making use of transitions
     // nav - an OpenWanderer.Navigator object (used to look up metadata etc)
     // imageNew - ID of image to navigate to
-    goTo: function (nav, imageNew) {
+    goTo: function (nav, imageNew, sphereCorrection) {
         return new Promise ( (resolve, reject) => {
+            this.sphereCorrection=sphereCorrection;
             this.resolve = resolve;
             this.psv = nav.viewer.psv;
             const metadata = nav.panoMetadata[imageNew];
@@ -212,7 +213,8 @@ const Transition  = {
         return new Promise ((resolve, reject) => {
             this.psv.setPanorama(url,
                 { transition:false,
-                    showLoader:false
+                    showLoader:false,
+					sphereCorrection: this.sphereCorrection
             }).then(() => {
                 // use loading time of panorama for better timed animation
                 let delayTime = new Date();

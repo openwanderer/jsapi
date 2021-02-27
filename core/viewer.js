@@ -35,6 +35,7 @@ class Viewer {
         this.curPathId = 0;
         this.psv = new PhotoSphereViewer.Viewer({
             container: document.querySelector(container || '#viewer'),
+            useXmpData: false,
             plugins: [
                 PhotoSphereViewer.MarkersPlugin
             ]
@@ -83,6 +84,7 @@ class Viewer {
      * Use rotate(), below, to live-rotate an existing pano.
      */
     setRotation(angle, component='pan') {
+        console.log(`Setting ${component} to ${angle}`);
         this._doSetRotation(angle * (Math.PI / 180.0), component);
     }
 
@@ -106,6 +108,7 @@ class Viewer {
      * Returns: the Promise returned by the PSV Viewer's setPanorama(). 
      */
     setPanorama(panorama) {
+        console.log(`Loading panorama ${panorama} with ${this.orientation.pan*(180/Math.PI)} ${this.orientation.tilt*(180/Math.PI)} ${this.orientation.roll*(180/Math.PI)}`);
         return this.psv.setPanorama(panorama, {
             sphereCorrection: { 
                 pan: -this.orientation.pan,
