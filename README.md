@@ -17,6 +17,6 @@ At present, the following classes exist:
 
 At present only one add-on API is available, the `transitions` API containing transitions developed by Eesger Toering. These produce a nice transition effect when moving from one pano to another. Note that currently there are some artefacts if point markers (representing pano locations) are present on your panorama, though polylines (representing the route of a sequence) are OK. 
 
-## Demos
+## Examples
 
-Demos can be found in the `examples` directory. Currently there are two basic demos, one showing usage of `OpenWanderer.Viewer` and the other showing usage of `OpenWanderer.Navigator`.
+Examples can be found in the `examples` directory within `core`. Currently there are two basic demos, one showing usage of `OpenWanderer.Viewer` and the other showing usage of `OpenWanderer.Navigator`. These are now accompanied by a walkthrough guide.
