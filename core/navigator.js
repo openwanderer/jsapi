@@ -29,6 +29,9 @@ import Viewer from './viewer.js';
  *   containing 'panoid', 'lon', 'lat', 'ele', 'pan' and optional 'tilt' and
  *  'roll' properties, as above (again these would be provided by an API)
  *
+ * If neither are supplied, a default sequence provider function will be used
+ * which fetches the data from the 'sequnceUrl' API option.
+ *
  * Contains code (explicitly marked) created by: 
  * Eesger Toering / knoop.frl / Project GEO Archive                
  *
@@ -36,6 +39,9 @@ import Viewer from './viewer.js';
  */
 
 /* Changelog:
+ *
+ * v0.0.6 (01/03/21) - remove the external sequence-provider.js and replace 
+ * with a default sequence provider.
  *
  * v0.0.5 (27/02/21) - can specify 'image' property in pano JSON for sequences,
  * allowing use of arbitrary images (filename does not need to match image ID)
@@ -57,7 +63,17 @@ class Navigator {
         this.sequences = [];
         this.panoMetadata = { };
 
-        if(options.sequence instanceof Function){
+        if(!options.sequence) {
+            this.loadSequence = async(seqid) => {
+                const seqResponse = await fetch(this.api.sequenceUrl.replace('{id}', seqid));
+                const json = await seqResponse.json();
+                const result = { 
+                    seqid: seqid,
+                    panos: json
+                };
+                return result;
+            };
+        } else if (options.sequence instanceof Function){
             this.loadSequence = options.sequence;
         } else if (options.sequence instanceof Array) {
             this.addSequence(1, options.sequence);
@@ -68,11 +84,7 @@ class Navigator {
         this.lon = 0.0;
         this.eventHandlers = {};
         this.resizePano = options.resizePano;
-        this.api = { };
-        this.api.nearest = options.api.nearest;
-        this.api.byId = options.api.byId;  
-        this.api.panoImg = options.api.panoImg; 
-        this.api.panoImgResized = options.api.panoImgResized; 
+        this.api = Object.assign({ }, options.api);
         this.svgEffects = options.svgEffects === undefined ? true: options.svgEffects;
         this.panoTransFunc = options.panoTransFunc || null;
         this.viewer.markersPlugin.on("select-marker", async (e, marker, data) => {

@@ -162,7 +162,7 @@ navigator.loadPanorama(1);
 This will show the panorama, and also show you the sequence as a navigable polyline route. The other panoramas in the sequence are shown as clickable markers;
 you can navigate to another panorama by clicking on it.
 
-## A word about pan, tilt and roll
+### A word about pan, tilt and roll
 
 At the moment, the pan (heading) angle (as well as tilt and roll in the
 second example) have to be manually specified. Photo Sphere Viewer v4.2 adds
