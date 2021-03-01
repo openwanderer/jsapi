@@ -173,4 +173,4 @@ Work is ongoing to update the relevant code; see the v4.2 branch.
 
 ## Further examples
 
-Further meaningful examples need a server to run. Please see the (example apps)[https://github.com/openwanderer/example-app] repo for examples of varying complexity.
+Further meaningful examples need a server to run. Please see the [example apps](https://github.com/openwanderer/example-app) repo for examples of varying complexity.
