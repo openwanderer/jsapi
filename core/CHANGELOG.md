@@ -1,7 +1,7 @@
 Changelog
 =========
 
-- v0.0.6 (01/03/21) - remove the external sequence-provider.js and replace 
+- v0.0.7 (01/03/21) - remove the external sequence-provider.js and replace 
  with a default sequence provider.
  *
 - v0.0.5 (27/02/21) - can specify 'image' property in pano JSON for sequences,

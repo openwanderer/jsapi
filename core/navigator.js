@@ -40,7 +40,7 @@ import Viewer from './viewer.js';
 
 /* Changelog:
  *
- * v0.0.6 (01/03/21) - remove the external sequence-provider.js and replace 
+ * v0.0.7 (01/03/21) - remove the external sequence-provider.js and replace 
  * with a default sequence provider.
  *
  * v0.0.5 (27/02/21) - can specify 'image' property in pano JSON for sequences,
@@ -85,6 +85,9 @@ class Navigator {
         this.eventHandlers = {};
         this.resizePano = options.resizePano;
         this.api = Object.assign({ }, options.api);
+        this.api.panoImg = this.api.panoImg || 'panorama/{id}.jpg';
+        this.api.sequenceUrl = this.api.sequenceUrl || 'sequence/{id}';
+        this.api.nearest = this.api.nearest || 'nearest/{lon}/{lat}';
         this.svgEffects = options.svgEffects === undefined ? true: options.svgEffects;
         this.panoTransFunc = options.panoTransFunc || null;
         this.viewer.markersPlugin.on("select-marker", async (e, marker, data) => {
