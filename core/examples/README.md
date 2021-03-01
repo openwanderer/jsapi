@@ -170,3 +170,7 @@ functionality to automatically read these angles from XMP data from the
 panorama file. However a number of changes will need to be made to 
 the OpenWanderer jsapi to work with v4.2, so this does not work just yet.
 Work is ongoing to update the relevant code; see the v4.2 branch.
+
+## Further examples
+
+Further meaningful examples need a server to run. Please see the (example apps)[https://github.com/openwanderer/example-app] repo for examples of varying complexity.
