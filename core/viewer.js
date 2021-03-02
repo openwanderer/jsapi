@@ -35,16 +35,15 @@ class Viewer {
         this.curPathId = 0;
         this.psv = new PhotoSphereViewer.Viewer({
             container: document.querySelector(container || '#viewer'),
-            useXmpData: false,
             plugins: [
                 PhotoSphereViewer.MarkersPlugin
             ]
         });
         this.markersPlugin = this.psv.getPlugin(PhotoSphereViewer.MarkersPlugin);
         this.rotationLimits = {
-            pan: Math.PI,
-            tilt: 0.5 * Math.PI,
-            roll: 0.5 * Math.PI
+            pan: [0, 360],
+            tilt:[-90, 90],
+            roll: [-180, 180]
         };
     }
 
@@ -84,19 +83,18 @@ class Viewer {
      * Use rotate(), below, to live-rotate an existing pano.
      */
     setRotation(angle, component='pan') {
-        console.log(`Setting ${component} to ${angle}`);
-        this._doSetRotation(angle * (Math.PI / 180.0), component);
+        this._doSetRotation(angle, component);
     }
 
     /* _doSetRotation()
      *
-     * Sets the angle in radians, ensuring it's between appropriate limits.
+     * Sets the angle in degrees, ensuring it's between appropriate limits.
      */
 
-    _doSetRotation(angleRad, component='pan') {
-        this.orientation[component] = angleRad;
-        if (this.orientation[component] > this.rotationLimits[component]) this.orientation[component] -= this.rotationLimits[component]*2;
-        if (this.orientation[component] < -this.rotationLimits[component]) this.orientation[component] += this.rotationLimits[component]*2;
+    _doSetRotation(angleDeg, component='pan') {
+        this.orientation[component] = angleDeg;
+        if (this.orientation[component] >= this.rotationLimits[component][1]) this.orientation[component] -= this.rotationLimits[component][1] - this.rotationLimits[component][0];
+        if (this.orientation[component] < this.rotationLimits[component][0]) this.orientation[component] += this.rotationLimits[component][1] - this.rotationLimits[component][0];
     }
 
     /* setPanorama()
@@ -108,12 +106,11 @@ class Viewer {
      * Returns: the Promise returned by the PSV Viewer's setPanorama(). 
      */
     setPanorama(panorama) {
-        console.log(`Loading panorama ${panorama} with ${this.orientation.pan*(180/Math.PI)} ${this.orientation.tilt*(180/Math.PI)} ${this.orientation.roll*(180/Math.PI)}`);
         return this.psv.setPanorama(panorama, {
-            sphereCorrection: { 
-                pan: -this.orientation.pan,
-                tilt: -this.orientation.tilt,
-                roll: -this.orientation.roll,
+            panoData: { 
+                poseHeading: -this.orientation.pan * (Math.PI / 180),
+                posePitch: -this.orientation.tilt * (Math.PI / 180),
+                poseRoll: -this.orientation.roll * (Math.PI / 180),
             }
         });
     }
@@ -126,8 +123,8 @@ class Viewer {
      * of the underlying PSV viewer.
      */
     rotate(diff, component='pan') {
-        this._doSetRotation(this.orientation[component] + diff*(Math.PI/180), component);
-        this.psv.setOption('sphereCorrection', { pan: -this.orientation.pan, tilt: -this.orientation.tilt, roll: -this.orientation.roll } );
+        this._doSetRotation(this.orientation[component] + diff, component);
+//        this.psv.setOption('sphereCorrection', { pan: -this.orientation.pan, tilt: -this.orientation.tilt, roll: -this.orientation.roll } );
     }
 
     /* addMarker()
@@ -244,7 +241,6 @@ class Viewer {
             }
 
             b = enuPlusMarkerdata(b, this.orientation.pan); 
-
             values.yawPitchDist.push([b[5], b[4], b[3]]);
         });
         if(pathWidth !== undefined) {
@@ -353,6 +349,29 @@ class Viewer {
             ]);
         }
         return multipolygon;
+    }
+
+    getCurrentViewHeading() {
+        // current heading of visible view will be innate heading plus current relative rotation
+        console.log(`******* getCurrentViewHeading() ********`);
+        console.log(`PAN=${this.orientation.pan}`);
+        console.log(`LONGITUDE=${this.psv.prop.position.longitude*(180/Math.PI)}`);
+        let vh = this.orientation.pan + this.psv.prop.position.longitude*(180/Math.PI);
+        if(vh > 360) vh -= 360;
+        console.log(`vh=${vh}`);
+        return vh;
+    }
+
+    setCurrentViewHeading(heading) {
+        console.log(`set: vh=${heading}`);
+        // where is the specified heading relative to the innate heading?
+        let relHeading = heading - this.orientation.pan;
+        if(relHeading < 0) relHeading += 360;
+        console.log(`PAN=${this.orientation.pan}`);
+        console.log(`REL HEADING=${relHeading}`);
+
+        // set the relative rotation accordingly
+        this.psv.rotate({longitude: relHeading * (Math.PI/180), latitude: 0});    
     }
 }
 

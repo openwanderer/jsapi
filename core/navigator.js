@@ -57,7 +57,17 @@ class Navigator {
         this.sequences = [];
         this.panoMetadata = { };
 
-        if(options.sequence instanceof Function){
+        if(!options.sequence) {
+            this.loadSequence = async(seqid) => {
+                const seqResponse = await fetch(this.api.sequenceUrl.replace('{id}', seqid));
+                const json = await seqResponse.json();
+                const result = { 
+                    seqid: seqid,
+                    panos: json
+                };
+                return result;
+            };
+        } else if(options.sequence instanceof Function){
             this.loadSequence = options.sequence;
         } else if (options.sequence instanceof Array) {
             this.addSequence(1, options.sequence);
@@ -68,11 +78,7 @@ class Navigator {
         this.lon = 0.0;
         this.eventHandlers = {};
         this.resizePano = options.resizePano;
-        this.api = { };
-        this.api.nearest = options.api.nearest;
-        this.api.byId = options.api.byId;  
-        this.api.panoImg = options.api.panoImg; 
-        this.api.panoImgResized = options.api.panoImgResized; 
+        this.api = Object.assign({ }, options.api);
         this.svgEffects = options.svgEffects === undefined ? true: options.svgEffects;
         this.panoTransFunc = options.panoTransFunc || null;
         this.viewer.markersPlugin.on("select-marker", async (e, marker, data) => {
@@ -145,9 +151,13 @@ class Navigator {
              await this._loadPanoMetadata(id);
         } 
 
-        const pan = this.panoMetadata[id].pan || 0;
-        const tilt = this.panoMetadata[id].tilt || 0;
-        const roll = this.panoMetadata[id].roll || 0;
+        const pan = parseFloat(this.panoMetadata[id].pan) || 0;
+        const tilt = parseFloat(this.panoMetadata[id].tilt) || 0;
+        const roll = parseFloat(this.panoMetadata[id].roll) || 0;
+
+        if(this.viewer.psv.renderer.camera !== null) {
+            this.curViewHeading = this.viewer.getCurrentViewHeading();
+        }
 
         this.viewer.setRotation(pan, 'pan');
         this.viewer.setRotation(tilt, 'tilt');
@@ -161,6 +171,7 @@ class Navigator {
                 this._loadMarkers(id)
             });
         } else {
+            console.log(`curViewHeading = ${this.curViewHeading}`);
             this.viewer.setPanorama(
                 this.resizePano === undefined ? 
                     this.panoMetadata[id].image || this.api.panoImg.replace('{id}', id) : 
@@ -169,6 +180,9 @@ class Navigator {
                         .replace('{width}', this.resizePano)
             ).then( () => { 
                 this._loadMarkers(id);
+                if(this.curViewHeading !== undefined) {
+                    this.viewer.setCurrentViewHeading(this.curViewHeading);
+                }
             });
         }
     }
