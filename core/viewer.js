@@ -27,9 +27,9 @@ class Viewer {
         this.lat = 91;
         this.elev = 0;
         this.orientation = {
-            pan: 0,
-            tilt: 0,
-            roll: 0
+            pan: null,
+            tilt: null,
+            roll: null 
         };
         this.curMarkerId = 0;
         this.curPathId = 0;
@@ -105,14 +105,16 @@ class Viewer {
      *
      * Returns: the Promise returned by the PSV Viewer's setPanorama(). 
      */
-    setPanorama(panorama) {
-        return this.psv.setPanorama(panorama, {
-            panoData: { 
-                poseHeading: -this.orientation.pan * (Math.PI / 180),
-                posePitch: -this.orientation.tilt * (Math.PI / 180),
-                poseRoll: -this.orientation.roll * (Math.PI / 180),
-            }
-        });
+    setPanorama(panorama, options = { }) {
+        const actualOptions = this.orientation.pan !== null && this.orientation.tilt !== null && this.orientation.roll !== null ? 
+            Object.assign({
+                panoData: { 
+                    poseHeading: -this.orientation.pan * (Math.PI / 180),
+                    posePitch: -this.orientation.tilt * (Math.PI / 180),
+                    poseRoll: -this.orientation.roll * (Math.PI / 180),
+                }
+            }, options) : options;
+        return this.psv.setPanorama(panorama, actualOptions);
     }
 
     /* rotate()
@@ -123,6 +125,7 @@ class Viewer {
      * of the underlying PSV viewer.
      */
     rotate(diff, component='pan') {
+        if(this.orientation[component] === null) this.orientation[component] = 0;
         this._doSetRotation(this.orientation[component] + diff, component);
 //        this.psv.setOption('sphereCorrection', { pan: -this.orientation.pan, tilt: -this.orientation.tilt, roll: -this.orientation.roll } );
     }
@@ -240,7 +243,7 @@ class Viewer {
                 b[2] -= Math.sin(options.degDown * Math.PI/180) * b[3];
             }
 
-            b = enuPlusMarkerdata(b, this.orientation.pan); 
+            b = enuPlusMarkerdata(b, this.orientation.pan || 0); 
             values.yawPitchDist.push([b[5], b[4], b[3]]);
         });
         if(pathWidth !== undefined) {
@@ -262,7 +265,7 @@ class Viewer {
         polyProj.forEach ( p => {
              // Because the polygon coords are in the correct reference frame, this will work...
             let b = geodeticToEnu(p[1], p[0], p[2] === undefined ? -1.5: p[2], this.lat, this.lon, this.elev || 0);
-            b = enuPlusMarkerdata(p, this.orientation.pan);
+            b = enuPlusMarkerdata(p, this.orientation.pan || 0);
             path.push([b[5], b[4]]);
         });
         return split ? this._splitPolygon(path) : path;
@@ -351,24 +354,33 @@ class Viewer {
         return multipolygon;
     }
 
+    /* getCurrentViewHeading()
+     *
+     * Get the bearing, in degrees, of the current centre of the panorama.
+     *
+     * Used when transitioning from one pano to another to ensure we face the
+     * same direction. 
+     */
+
     getCurrentViewHeading() {
         // current heading of visible view will be innate heading plus current relative rotation
-        console.log(`******* getCurrentViewHeading() ********`);
-        console.log(`PAN=${this.orientation.pan}`);
-        console.log(`LONGITUDE=${this.psv.prop.position.longitude*(180/Math.PI)}`);
-        let vh = this.orientation.pan + this.psv.prop.position.longitude*(180/Math.PI);
+        let vh = (this.orientation.pan || 0) + this.psv.prop.position.longitude*(180/Math.PI);
         if(vh > 360) vh -= 360;
-        console.log(`vh=${vh}`);
         return vh;
     }
 
+    /* setCurrentViewHeading()
+     *
+     * Set the bearing, in degrees, of the current centre of the panorama.
+     *
+     * Used when transitioning from one pano to another to ensure we face the
+     * same direction. 
+     */
+
     setCurrentViewHeading(heading) {
-        console.log(`set: vh=${heading}`);
         // where is the specified heading relative to the innate heading?
-        let relHeading = heading - this.orientation.pan;
+        let relHeading = heading - (this.orientation.pan || 0);
         if(relHeading < 0) relHeading += 360;
-        console.log(`PAN=${this.orientation.pan}`);
-        console.log(`REL HEADING=${relHeading}`);
 
         // set the relative rotation accordingly
         this.psv.rotate({longitude: relHeading * (Math.PI/180), latitude: 0});    
