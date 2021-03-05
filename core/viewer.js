@@ -34,6 +34,7 @@ class Viewer {
         this.curMarkerId = 0;
         this.curPathId = 0;
         this.psv = new PhotoSphereViewer.Viewer({
+            useXmpData: false,
             container: document.querySelector(container || '#viewer'),
             plugins: [
                 PhotoSphereViewer.MarkersPlugin
@@ -105,14 +106,14 @@ class Viewer {
      *
      * Returns: the Promise returned by the PSV Viewer's setPanorama(). 
      */
-    setPanorama(panorama) {
-        return this.psv.setPanorama(panorama, {
+    setPanorama(panorama, options = {}) {
+        return this.psv.setPanorama(panorama, Object.assign({
             sphereCorrection: { 
                 pan: -this.orientation.pan,
                 tilt: -this.orientation.tilt,
-                roll: -this.orientation.roll,
+                roll: -this.orientation.roll
             }
-        });
+        }, options));
     }
 
     /* rotate()

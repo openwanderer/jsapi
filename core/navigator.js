@@ -40,6 +40,9 @@ import Viewer from './viewer.js';
 
 /* Changelog:
  *
+ * v0.0.8 (05/03/21) - adapt to work with PSV4.2  though useXmpData must be
+ * set to false; viewer.setPanorama() called back from transition module. 
+ *
  * v0.0.7 (01/03/21) - remove the external sequence-provider.js and replace 
  * with a default sequence provider.
  *
@@ -172,7 +175,7 @@ class Navigator {
         
         // the camera is null the first time it loads
         if(this.viewer.psv.renderer.camera !== null && this.panoTransFunc) {
-            this.panoTransFunc(this, id).then( ()=> {
+            this.panoTransFunc(id).then( ()=> {
                 this._loadMarkers(id)
             });
         } else {

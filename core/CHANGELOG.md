@@ -1,6 +1,8 @@
 Changelog
 =========
 
+- v0.0.8 (05/03/21) - adapt to work with PSV4.2  though useXmpData must be set to false; viewer.setPanorama() called back from transition module. 
+
 - v0.0.7 (01/03/21) - remove the external sequence-provider.js and replace 
  with a default sequence provider.
  *

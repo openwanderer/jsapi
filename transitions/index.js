@@ -30,8 +30,9 @@ const Transition  = {
 
 
     // dynamically add the required CSS (from Eesger) to the page
-    init: function() {
-
+    init: function(nav) {
+        this.nav = nav;
+        this.psv = this.nav.viewer.psv;
         const style = document.createElement("style");
         style.setAttribute("type", "text/css");
 
@@ -68,11 +69,10 @@ const Transition  = {
     // go to a given panorama making use of transitions
     // nav - an OpenWanderer.Navigator object (used to look up metadata etc)
     // imageNew - ID of image to navigate to
-    goTo: function (nav, imageNew) {
+    goTo: function (imageNew) {
         return new Promise ( (resolve, reject) => {
             this.resolve = resolve;
-            this.psv = nav.viewer.psv;
-            const metadata = nav.panoMetadata[imageNew];
+            const metadata = this.nav.panoMetadata[imageNew];
             if (!metadata) {
                 reject('Transition.goTo(): imageID '+imageNew+' does not exist!!');
                 return;
@@ -86,7 +86,7 @@ const Transition  = {
 
             this.imageDelay.timer = ((delayTime.getHours()*60+delayTime.getMinutes())*60+delayTime.getSeconds())*1000+delayTime.getMilliseconds();  
             this.container = this.psv.config.container;
-            const spherical = nav.viewer._calcSphericalCoords ([[parseFloat(metadata.lon), parseFloat(metadata.lat), metadata.ele]]);
+            const spherical = this.nav.viewer._calcSphericalCoords ([[parseFloat(metadata.lon), parseFloat(metadata.lat), metadata.ele]]);
             const yawPitchDist = spherical.yawPitchDist[0];
             
             // get pixelpositions of the new location | lon/lat are relative 
@@ -140,7 +140,7 @@ const Transition  = {
                 .first()
                 .append('<div id="GA'+this.container.id+'Transition" class="GATransition" style="position:absolute;top:0;left:0;width:100%;height:100%;">'+
         '<img id="GA'+this.container.id+'TransitionCanvas"  class="GATransitionCanvas" src="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==">'+
-                 '<img id="GA'+this.container.id+'TransitionMarkers" class="GATransitionCanvas" src="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==">'+
+// NW MARKERS COMMENTED OUT FOR NOW                 '<img id="GA'+this.container.id+'TransitionMarkers" class="GATransitionCanvas" src="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==">'+
                   '</div>');
 
             // copy source Canvas for animation
@@ -151,7 +151,7 @@ const Transition  = {
                 this.psv.renderer.renderer.domElement.toDataURL() + ')');
 
             // copy markers SVG (only!) for animation (and remove gradients)
-            $('#GA'+this.container.id+'TransitionMarkers').attr('src', 'data:image/svg+xml;base64,'+ btoa($('#'+this.container.id).find('.psv-markers').first().html().replace(/^.*?<svg /, '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+this.psv.container.offsetWidth+' '+this.psv.container.offsetHeight+'" ') .replace(/url\(\#GAgradient[0-9]\)/g, this.markerBaseFill) .replace(/\/svg>.*$/, '/svg>')));
+// NW MARKERS COMMENTED OUT FOR NOW            $('#GA'+this.container.id+'TransitionMarkers').attr('src', 'data:image/svg+xml;base64,'+ btoa($('#'+this.container.id).find('.psv-markers').first().html().replace(/^.*?<svg /, '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+this.psv.container.offsetWidth+' '+this.psv.container.offsetHeight+'" ') .replace(/url\(\#GAgradient[0-9]\)/g, this.markerBaseFill) .replace(/\/svg>.*$/, '/svg>')));
 
             // create a separate thread for the first step of the animation
             setTimeout(this._animationFirstStage.bind(this, pos, scale), 100);
@@ -160,7 +160,7 @@ const Transition  = {
             // (in a timeout, otherwise the removing initiated above doesn't 
             // get done smoothly..)
             setTimeout(() => {
-                this._doSetPano(nav.api.panoImg.replace('{id}', imageNew))
+                this._doSetPano(this.nav.api.panoImg.replace('{id}', imageNew))
                     .then (resolve)
                 }, 250);
        });
@@ -180,7 +180,7 @@ const Transition  = {
             animateLeft = (100-(scale*100))/2;
             $('#GA'+this.container.id+'Transition').addClass('GAborderfade1');
             $('#GA'+this.container.id+'TransitionCanvas').addClass('GAborderfade2');
-            $('#GA'+this.container.id+'TransitionMarkers').addClass('GAborderfade2');
+// NW MARKERS COMMENTED OUT FOR NOW            $('#GA'+this.container.id+'TransitionMarkers').addClass('GAborderfade2');
         } else {
             // factor in difference in viewing direction 
             // (when available, work in progress, 
@@ -210,7 +210,7 @@ const Transition  = {
 
     _doSetPano: function(url) {
         return new Promise ((resolve, reject) => {
-            this.psv.setPanorama(url,
+            this.nav.viewer.setPanorama(url,
                 { transition:false,
                     showLoader:false
             }).then(() => {
@@ -240,7 +240,6 @@ const Transition  = {
                 setTimeout(() => { resolve(); },markertimer);
 
                 // second stage of the animation
-                console.log('Second stage of animation...');
                 if ($('#GA'+this.container.id+'Transition').length) {
                 // in a seperate thread (otherwise the markers flicker)
                     setTimeout(() => {
@@ -248,7 +247,6 @@ const Transition  = {
                         this._animationSecondStage();
                     }, this.imageDelay.time * this.imageDelay.ease * 0.1);
                 } else {
-                    console.log('No transition');
                     // allow next transition 
                     this.goToActive = 0;
                     resolve();
