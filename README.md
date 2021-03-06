@@ -17,4 +17,4 @@ At present only one add-on API is available, the `transitions` API containing tr
 
 ## Examples
 
-Examples can be found in the `examples` directory within `core`. Currently there are two basic demos, one showing usage of `OpenWanderer.Viewer` and the other showing usage of `OpenWanderer.Navigator`. These are now accompanied by a walkthrough guide.
+Examples can be found in the [`examples`](core/examples) directory within `core`. Currently there are two basic demos, one showing usage of `OpenWanderer.Viewer` and the other showing usage of `OpenWanderer.Navigator`. These are now accompanied by a walkthrough guide.

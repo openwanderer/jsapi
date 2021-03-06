@@ -167,10 +167,12 @@ you can navigate to another panorama by clicking on it.
 At the moment, the pan (heading) angle (as well as tilt and roll in the
 second example) have to be manually specified. Photo Sphere Viewer v4.2 adds
 functionality to automatically read these angles from XMP data from the
-panorama file. However a number of changes will need to be made to 
-the OpenWanderer jsapi to work with v4.2, so this does not work just yet.
-Work is ongoing to update the relevant code; see the v4.2 branch.
+panorama file. However this is not working at present, due to the fact that auto-loaded XMP data cannot then be manually adjusted. It is hoped to resolve this.
 
 ## Further examples
 
-Further meaningful examples need a server to run. Please see the [example apps](https://github.com/openwanderer/example-app) repo for examples of varying complexity.
+Further meaningful examples need a server to run. Please see these apps in the [example apps](https://github.com/openwanderer/example-app) repo:
+
+- [Server Hello World](https://github.com/openwanderer/example-app/tree/master/hello-world)
+- [Basic Server example](https://github.com/openwanderer/example-app/tree/master/basic)
+- [Full example application](https://github.com/openwanderer/example-app/tree/master/full)
