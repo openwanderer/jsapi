@@ -32,11 +32,9 @@ National Park of southern England.
 viewer.setLonLat(-0.9807, 50.966275);
 viewer.setElevation(126);
 ```
-We then specify the heading (yaw, azimuth, bearing) of the panorama. This is necessary to align the panorama correctly so that markers are at the correct position.  You need to use a heading in the range -180 -> 0 -> 180. Our example panorama has a heading of 3 degrees. In a server-based application, the server could
-send the heading back to the client and do this step automatically, but for
-now, we will do it manually.
+We then correct the heading (yaw, azimuth, bearing) of the panorama. This is necessary to align the panorama correctly so that markers are at the correct position.  You need to use a heading in the range -180 -> 0 -> 180. Our example panorama needs correcting by 3 degrees clockwise as the heading from the XMP data is 'off' by 3 degrees. In a server-based application, the server could send the heading back to the client and do this step automatically, but for now, we will do it manually.
 ```
-viewer.setRotation(3);
+viewer.setRotationCorrection(3);
 ```
 We next set the actual panorama file. This is a thin wrapper around the 
 equivalent method in Photo Sphere Viewer, and returns a promise which resolves
@@ -108,7 +106,7 @@ objects. Each pano object should have the following properties:
 - `ele` : the panorama's elevation, in metres:
 - `tilt` : the panorama's tilt (pitch) angle;
 - `roll` : the panorama's roll angle;
-- `pan` : the panorama's pan (yaw, azimuth, bearing) angle.
+- `pancorrection` : *optional* correction to the pan (heading) if needed. This will be needed if the XMP heading (yaw) within the image is incorrect, and will rotate the panorama clockwise by the given correction. Similar `tiltcorrection` and `rollcorrection` properties exist. If the XMP data is accurate, `pancorrection` can be omitted.
 
 So here is a full example:
 ```
@@ -121,36 +119,28 @@ const navigator = new OpenWanderer.Navigator({
               "lon":"-1.4116138888889",
               "lat":"50.9347",
               "ele":58,
-              "tilt":-10,
-              "roll":0,
-              "pan":-178
+              "pancorrection": 119
             },{ 
               "panoid":2,
               "image": 'images/10.jpg',
               "lon":"-1.4115071296692",
               "lat":"50.934328480366",
               "ele":56,
-              "tilt":-20,
-              "roll":0,
-              "pan":175
+              "pancorrection": 155
             },{
               "panoid":3,
               "image": 'images/11.jpg',
               "lon":"-1.4114320278168",
               "lat":"50.933888985495",
               "ele":55,
-              "tilt":-5,
-              "roll":0,
-              "pan":170
+              "pancorrection": 56
             },{
               "panoid":4,
                "image": 'images/12.jpg',
                "lon":"-1.4115822441333",
                "lat":"50.9334292018",
                "ele":53,
-               "tilt":-10,
-               "roll":0,
-               "pan":-145
+               "pancorrection": 30
         }]
 })
 ``` 
@@ -161,13 +151,6 @@ navigator.loadPanorama(1);
 ```
 This will show the panorama, and also show you the sequence as a navigable polyline route. The other panoramas in the sequence are shown as clickable markers;
 you can navigate to another panorama by clicking on it.
-
-### A word about pan, tilt and roll
-
-At the moment, the pan (heading) angle (as well as tilt and roll in the
-second example) have to be manually specified. Photo Sphere Viewer v4.2 adds
-functionality to automatically read these angles from XMP data from the
-panorama file. However this is not working at present, due to the fact that auto-loaded XMP data cannot then be manually adjusted. It is hoped to resolve this.
 
 ## Further examples
 

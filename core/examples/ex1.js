@@ -15,10 +15,12 @@ viewer.setLonLat(-0.9807, 50.966275);
 // Specify our current elevation (metres)
 viewer.setElevation(126);
 
-// Specify the heading (yaw, poseheadingdegrees) of the panorama we will load.
-// Important! For an unknown reason as yet, values between 180 and 360 do not
-// appear to work correctly. Has to be in range -180 -> 0 -> 180.
-viewer.setRotation(3);
+// Specify the rotation correction. Sometimes XMP data is inaccurate; this
+// API call allows you to correct the pan (heading).
+// You can also correct the tilt and roll if you supply a component of 'tilt' 
+// or 'roll' as the second argument.
+// The panorama rotates clockwise relative to markers as you increase 0->360.
+viewer.setRotationCorrection(3);
 
 // Load the panorama, then add markers.
 viewer.setPanorama('images/1200.jpg').then ( () => {

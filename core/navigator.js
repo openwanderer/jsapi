@@ -19,15 +19,19 @@ import Viewer from './viewer.js';
  *
  * The static pano sequence should be an array of objects making up the
  * sequence. Each pano should be an object containing 'panoid', 'lon', 'lat',
- * 'ele', 'pan' and optional 'tilt' and 'roll' properties, as well as an 
- * optional 'image' property for the image itself (otherwise the panoImg API
- * setting with the image ID is used to work out which image to use)
+ * 'ele', 'pancorrection' and optional 'tiltcorrection' and 'rollcorrection' 
+ * properties, as well as an  optional 'image' property for the image itself 
+ * (otherwise * the panoImg API * setting with the image ID is used to work 
+ * out which image to use).
+ * 'pancorrection', 'tiltcorrection' and 'rollcorrection' represent manual
+ * corrections of the pan, tilt and roll from the XMP angles.
  *
  * The function should return an object containing these properties:
  * - seqid: the sequence ID (this would typically be provided by an API)
  * - panos: an array of objects representing each pano, with each object
- *   containing 'panoid', 'lon', 'lat', 'ele', 'pan' and optional 'tilt' and
- *  'roll' properties, as above (again these would be provided by an API)
+ *   containing 'panoid', 'lon', 'lat', 'ele', 'pancorrection' and optional 
+ *  'tiltcorrection' and *  'rollcorrection' properties, as above (again these 
+ * would be provided by an API)
  *
  * If neither are supplied, a default sequence provider function will be used
  * which fetches the data from the 'sequnceUrl' API option.
@@ -39,6 +43,10 @@ import Viewer from './viewer.js';
  */
 
 /* Changelog:
+ *
+ * v0.0.9 (09/03/21) - fully working with PSV4.2.1 allowing inherent XMP
+ * data to be combined with sphere correction. Pan, tilt and roll are
+ * CORRECTIONS to XMP data, NOT the raw values.
  *
  * v0.0.8 (05/03/21) - adapt to work with PSV4.2  though useXmpData must be
  * set to false; viewer.setPanorama() called back from transition module. 
@@ -163,15 +171,13 @@ class Navigator {
              await this._loadPanoMetadata(id);
         } 
 
-        const pan = this.panoMetadata[id].pan || 0;
-        const tilt = this.panoMetadata[id].tilt || 0;
-        const roll = this.panoMetadata[id].roll || 0;
+        const panCorrection = this.panoMetadata[id].pancorrection || 0;
+        const tiltCorrection = this.panoMetadata[id].tiltcorrection || 0;
+        const rollCorrection = this.panoMetadata[id].rollcorrection || 0;
 
-        this.viewer.setRotation(pan, 'pan');
-        this.viewer.setRotation(tilt, 'tilt');
-        this.viewer.setRotation(roll, 'roll');
-        
-        
+        this.viewer.setRotationCorrection(panCorrection, 'pan');
+        this.viewer.setRotationCorrection(tiltCorrection, 'tilt');
+        this.viewer.setRotationCorrection(rollCorrection, 'roll');
         
         // the camera is null the first time it loads
         if(this.viewer.psv.renderer.camera !== null && this.panoTransFunc) {
@@ -272,21 +278,23 @@ class Navigator {
     }
 
     _createPaths(id) {
-        const path = this.panoMetadata[id].sequence.panos.map ( pano => [pano.lon, pano.lat, parseFloat(pano.ele)] );
-        this.panoMetadata[id].sequence.panos.forEach ( pano => {
-            pano.key = `marker-${id}-${pano.panoid}`;
-            this.viewer.addMarker([pano.lon, pano.lat, pano.ele], { 
-                id : pano.key, 
-                tooltip: `Location of pano ${pano.panoid}` 
-            } );
-        });
-        this.panoMetadata[id].sequence.key = `path-${id}-${this.panoMetadata[id].sequence.seqid}`;
-        this.viewer.addPath(path, { 
-            tooltip: `sequence ${this.panoMetadata[id].sequence.seqid}`,
-            id: this.panoMetadata[id].sequence.seqid,
-            degDown: 1,
-            splitPath: this.splitPath,
-        });
+        if (this.panoMetadata[id].sequence.seqid > 0) {
+            const path = this.panoMetadata[id].sequence.panos.map ( pano => [pano.lon, pano.lat, parseFloat(pano.ele)] );
+            this.panoMetadata[id].sequence.panos.forEach ( pano => {
+                pano.key = `marker-${id}-${pano.panoid}`;
+                this.viewer.addMarker([pano.lon, pano.lat, pano.ele], { 
+                    id : pano.key, 
+                    tooltip: `Location of pano ${pano.panoid}` 
+                } );
+            });
+            this.panoMetadata[id].sequence.key = `path-${id}-${this.panoMetadata[id].sequence.seqid}`;
+            this.viewer.addPath(path, { 
+                tooltip: `sequence ${this.panoMetadata[id].sequence.seqid}`,
+                id: this.panoMetadata[id].sequence.seqid,
+                degDown: 1,
+                splitPath: this.splitPath,
+            });
+        }
         this.viewer.markersPlugin.on('over-marker', (e, marker) => {
             this._markerOver(marker.id);
         });

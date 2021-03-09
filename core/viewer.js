@@ -26,7 +26,7 @@ class Viewer {
         this.lon = 181;
         this.lat = 91;
         this.elev = 0;
-        this.orientation = {
+        this.orientationCorrection = {
             pan: 0,
             tilt: 0,
             roll: 0
@@ -34,7 +34,7 @@ class Viewer {
         this.curMarkerId = 0;
         this.curPathId = 0;
         this.psv = new PhotoSphereViewer.Viewer({
-            useXmpData: false,
+            sphereCorrectionReorder: true,
             container: document.querySelector(container || '#viewer'),
             plugins: [
                 PhotoSphereViewer.MarkersPlugin
@@ -42,9 +42,9 @@ class Viewer {
         });
         this.markersPlugin = this.psv.getPlugin(PhotoSphereViewer.MarkersPlugin);
         this.rotationLimits = {
-            pan: Math.PI,
-            tilt: 0.5 * Math.PI,
-            roll: 0.5 * Math.PI
+            pan: [0, Math.PI*2],
+            tilt: [-Math.PI*0.5, Math.PI*0.5],
+            roll: [-Math.PI, Math.PI]
         };
     }
 
@@ -67,23 +67,20 @@ class Viewer {
         this.elev = elev;
     }
 
-    /* setRotation()
+    /* setRotationCorrection()
      *
-     * Set the current panorama angle (pan, yaw) or tilt (pitch) / roll; would 
-     * typically be provided by the pano's metadata (returned from an API)
+     * Set the current panorama correction (pan, yaw) or tilt (pitch) / roll; 
+     * would  typically be provided by the pano's metadata (returned from an 
+     * API)
      *
      * IMPORTANT: Note that the angle is specified in degrees but stored
      * internally as radians.
-     *
-     * Also IMPORTANT: Incorrect results are obtained if the angle is
-     * between 180 and 360. Must be in range -180 -> 0 -> 180. 
-     * Now adjusts the angle to ensure it's in this range.
      *
      * Note that this does not actually live-rotate an existing panorama.
      * It's intended to set the angle BEFORE a new panorama is loaded.
      * Use rotate(), below, to live-rotate an existing pano.
      */
-    setRotation(angle, component='pan') {
+    setRotationCorrection(angle, component='pan') {
         this._doSetRotation(angle * (Math.PI / 180.0), component);
     }
 
@@ -93,9 +90,10 @@ class Viewer {
      */
 
     _doSetRotation(angleRad, component='pan') {
-        this.orientation[component] = angleRad;
-        if (this.orientation[component] > this.rotationLimits[component]) this.orientation[component] -= this.rotationLimits[component]*2;
-        if (this.orientation[component] < -this.rotationLimits[component]) this.orientation[component] += this.rotationLimits[component]*2;
+        this.orientationCorrection[component] = angleRad;
+        const rotationRange = this.rotationLimits[component][1] - this.rotationLimits[component][0];
+        if (this.orientationCorrection[component] > this.rotationLimits[component][1]) this.orientationCorrection[component] -= rotationRange;
+        if (this.orientationCorrection[component] < this.rotationLimits[component][0]) this.orientationCorrection[component] += rotationRange; 
     }
 
     /* setPanorama()
@@ -109,9 +107,9 @@ class Viewer {
     setPanorama(panorama, options = {}) {
         return this.psv.setPanorama(panorama, Object.assign({
             sphereCorrection: { 
-                pan: -this.orientation.pan,
-                tilt: -this.orientation.tilt,
-                roll: -this.orientation.roll
+                pan: -this.orientationCorrection.pan,
+                tilt: -this.orientationCorrection.tilt,
+                roll: -this.orientationCorrection.roll
             }
         }, options));
     }
@@ -124,8 +122,8 @@ class Viewer {
      * of the underlying PSV viewer.
      */
     rotate(diff, component='pan') {
-        this._doSetRotation(this.orientation[component] + diff*(Math.PI/180), component);
-        this.psv.setOption('sphereCorrection', { pan: -this.orientation.pan, tilt: -this.orientation.tilt, roll: -this.orientation.roll } );
+        this._doSetRotation(this.orientationCorrection[component] + diff*(Math.PI/180), component);
+        this.psv.setOption('sphereCorrection', { pan: -this.orientationCorrection.pan, tilt: -this.orientationCorrection.tilt, roll: -this.orientationCorrection.roll } );
     }
 
     /* addMarker()
@@ -140,7 +138,7 @@ class Viewer {
         const id = options.id || `marker-${++this.curMarkerId}`;
         let scale;
         const yp = sphericalCoords.yawPitchDist[0];
-        scale = (options.scale || 1) * 10 * (1/yp[2]);
+        scale = yp[2] < 0.001 ? 10 : (options.scale || 1) * 10 * (1/yp[2]);
         this.markersPlugin.addMarker({
             id: id, 
             tooltip: options.tooltip || 'marker', 
@@ -241,7 +239,7 @@ class Viewer {
                 b[2] -= Math.sin(options.degDown * Math.PI/180) * b[3];
             }
 
-            b = enuPlusMarkerdata(b, this.orientation.pan); 
+            b = enuPlusMarkerdata(b, (this.psv.prop.panoData.poseHeading || 0) * (Math.PI/180) + this.orientationCorrection.pan);
 
             values.yawPitchDist.push([b[5], b[4], b[3]]);
         });
@@ -264,7 +262,7 @@ class Viewer {
         polyProj.forEach ( p => {
              // Because the polygon coords are in the correct reference frame, this will work...
             let b = geodeticToEnu(p[1], p[0], p[2] === undefined ? -1.5: p[2], this.lat, this.lon, this.elev || 0);
-            b = enuPlusMarkerdata(p, this.orientation.pan);
+            b = enuPlusMarkerdata(p, (this.psv.prop.panoData.poseHeading || 0) * (Math.PI/180) + this.orientationCorrection.pan);
             path.push([b[5], b[4]]);
         });
         return split ? this._splitPolygon(path) : path;

@@ -1,4 +1,4 @@
-import '../jquery/dist/jquery.min.js'
+//import '../jquery/dist/jquery.min.js'
 
 /*
  * This code is Eesger Toering's transitions code, adapted to "plug in" to the
