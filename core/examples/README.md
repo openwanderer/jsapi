@@ -80,7 +80,7 @@ viewer.addPath([
     });
 ```
 
-## Example 2 : A basic navigator appliction
+## Example 2 : A basic navigator application
 
 Example 2 shows the basic use of the `OpenWanderer.Navigator` class, which allows you to navigate along a panorama sequence.
 
@@ -104,9 +104,7 @@ objects. Each pano object should have the following properties:
 - `lon` : the panorama's longitude.
 - `lat` : the panorama's latitude.
 - `ele` : the panorama's elevation, in metres:
-- `tilt` : the panorama's tilt (pitch) angle;
-- `roll` : the panorama's roll angle;
-- `pancorrection` : *optional* correction to the pan (heading) if needed. This will be needed if the XMP heading (yaw) within the image is incorrect, and will rotate the panorama clockwise by the given correction. Similar `tiltcorrection` and `rollcorrection` properties exist. If the XMP data is accurate, `pancorrection` can be omitted.
+- `pancorrection` : *optional* correction to the pan (heading) if needed. This will be needed if the XMP heading (yaw) within the image is incorrect, which is sometimes the case if the camera sensors are inaccurate, and will rotate the panorama clockwise by the given correction. Similar `tiltcorrection` and `rollcorrection` properties exist to correct the tilt (pitch) and roll. If the XMP data is accurate, `pancorrection` can be omitted.
 
 So here is a full example:
 ```

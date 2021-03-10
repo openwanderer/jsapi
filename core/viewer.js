@@ -86,7 +86,8 @@ class Viewer {
 
     /* _doSetRotation()
      *
-     * Sets the angle in radians, ensuring it's between appropriate limits.
+     * Sets the rotation angle correction in radians, ensuring it's between 
+     * appropriate limits.
      */
 
     _doSetRotation(angleRad, component='pan') {
@@ -134,7 +135,7 @@ class Viewer {
      * Returns: the ID of the marker.
      */
     addMarker(lonLatElev, options = {}) {
-        const sphericalCoords = this._calcSphericalCoords([lonLatElev]);
+        const sphericalCoords = this.calcSphericalCoords([lonLatElev]);
         const id = options.id || `marker-${++this.curMarkerId}`;
         let scale;
         const yp = sphericalCoords.yawPitchDist[0];
@@ -172,7 +173,7 @@ class Viewer {
      * Returns: the ID of the path.
      */
     addPath(lonLatElevs, options = {}) {
-        const sphericalCoords = this._calcSphericalCoords(lonLatElevs, options.width || 1, options), id = options.id || `path-${++this.curPathId}`;
+        const sphericalCoords = this.calcSphericalCoords(lonLatElevs, options.width || 1, options), id = options.id || `path-${++this.curPathId}`;
         if(options.splitPath === true) {
             sphericalCoords.path.forEach ( (polygon,i) => {
                 this.markersPlugin.addMarker({
@@ -205,7 +206,7 @@ class Viewer {
         return id;
     }
 
-    /* _calcSphericalCoords()
+    /* calcSphericalCoords()
      *
      * Input : an array of lon/lat/(optional elevation) points plus 'pathWidth'
      * If 'pathWidth' is specified, it will create spherical coords 
@@ -221,7 +222,7 @@ class Viewer {
      * - path (only returned if pathWidth is defined): yaw/pitch/distance for 
      * a polygonal path of a given width defined by the input points 
      */
-    _calcSphericalCoords(points, pathWidth, options={}) {
+    calcSphericalCoords(points, pathWidth, options={}) {
         const values = {
             yawPitchDist: [],
             path: []

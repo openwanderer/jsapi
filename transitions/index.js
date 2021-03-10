@@ -1,4 +1,4 @@
-//import '../jquery/dist/jquery.min.js'
+import '../jquery/dist/jquery.min.js'
 
 /*
  * This code is Eesger Toering's transitions code, adapted to "plug in" to the
@@ -86,7 +86,7 @@ const Transition  = {
 
             this.imageDelay.timer = ((delayTime.getHours()*60+delayTime.getMinutes())*60+delayTime.getSeconds())*1000+delayTime.getMilliseconds();  
             this.container = this.psv.config.container;
-            const spherical = this.nav.viewer._calcSphericalCoords ([[parseFloat(metadata.lon), parseFloat(metadata.lat), metadata.ele]]);
+            const spherical = this.nav.viewer.calcSphericalCoords ([[parseFloat(metadata.lon), parseFloat(metadata.lat), metadata.ele]]);
             const yawPitchDist = spherical.yawPitchDist[0];
             
             // get pixelpositions of the new location | lon/lat are relative 
