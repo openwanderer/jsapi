@@ -1,4 +1,3 @@
-import OpenWanderer from '../index.js';
 
 /*
  *

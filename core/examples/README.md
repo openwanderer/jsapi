@@ -6,22 +6,7 @@ This directory contains a series of examples of using the OpenWanderer JavaScrip
 
 [Example 1](ex1.html) is a very simple application showing the use of `OpenWanderer.Viewer`. This class is the most basic class within the API and allows you to create a panorama viewer, set its location within the world (in WGS84 latitude/longitude and elevation in metres), and add markers (again using WGS84 lat/lon and elevation in metres). `OpenWanderer.Viewer` is essentially a thin wrapper around `PhotoSphereViewer.Viewer` from [Photo Sphere Viewer](https://photo-sphere-viewer.js.org), allowing you to position panoramas and add markers using 'world' (WGS84) latitudes and longitudes.
 
-So on to the code. First we need to import the `OpenWanderer` module:
-```
-import OpenWanderer from '../index.js'
-```
-As the example is part of the `jsapi` repository, we are using a relative
-link here, but if using from your own project, you will want to install
-the API using npm:
-```
-npm install openwanderer-jsapi
-```
-and then import it from your `node_modules`:
-```
-import OpenWanderer from './node_modules/openwanderer-jsapi/index.js`;
-```
-Next we create an `OpenWanderer.Viewer` object, specifying a CSS selector
-identifying the page element hosting the panorama:
+So on to the code. First we create an `OpenWanderer.Viewer` object, specifying a CSS selector identifying the page element hosting the panorama:
 ```
 const viewer = new OpenWanderer.Viewer('#pano');
 ```
@@ -84,9 +69,7 @@ viewer.addPath([
 
 Example 2 shows the basic use of the `OpenWanderer.Navigator` class, which allows you to navigate along a panorama sequence.
 
-As for the first example, we need to import `OpenWanderer`; again, in your own application, you will probably want to do this with npm.
-
-We then create an `OpenWanderer.Navigator` object, again specifying the element
+We first create an `OpenWanderer.Navigator` object, again specifying the element
 hosting the panorama.
 ```
 const navigator = new OpenWandeerer.Navigator({

@@ -5,7 +5,6 @@
  * Simple usage of OpenWanderer.Viewer.
  *
  */ 
-import OpenWanderer from '../index.js';
 
 const viewer = new OpenWanderer.Viewer('#pano');
 
