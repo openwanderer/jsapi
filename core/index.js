@@ -1,7 +1,8 @@
+
 import Viewer from './viewer.js';
 import Navigator from './navigator.js';
 
-export default {
+export {
     Viewer,
     Navigator
 };

@@ -3,7 +3,7 @@
     "dependencies": {
         "jquery": "^3.5.1"
     },
-    "version": "0.0.4",
+    "version": "0.0.5",
     "repository": {
         "type": "git",
         "url": "https://github.com/openwanderer/jsapi"
@@ -16,5 +16,15 @@
         "free",
         "open source",
         "FOSS"
-    ]
+    ],
+    "devDependencies": {
+        "@babel/core": "^7.13.10",
+        "@babel/preset-env": "^7.13.10",
+        "babelify": "^10.0.0",
+        "browserify": "^17.0.0"
+    },
+    "scripts": {
+        "build": "browserify  index.js -o bundle.js --standalone OWTransition -t [babelify --presets [@babel/preset-env] ]"
+    },
+    "unpkg": "bundle.js"
 }

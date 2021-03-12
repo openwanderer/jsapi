@@ -1,4 +1,4 @@
-import '../jquery/dist/jquery.min.js'
+import './node_modules/jquery/dist/jquery.min.js'
 
 /*
  * This code is Eesger Toering's transitions code, adapted to "plug in" to the
@@ -276,4 +276,4 @@ const Transition  = {
     }
 };
 
-export default Transition;
+export { Transition };
