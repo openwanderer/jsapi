@@ -1,6 +1,12 @@
 Changelog
 =========
 
+## "Stable" versions (though still early in development)
+
+- v0.1.0 (12/03/21) - fully working with PSV4.2.1 allowing inherent XMP data to be combined with sphere correction. Pan, tilt and roll are *corrections* to XMP data, NOT the raw values. Builds to bundle; use unpkg to include in a project.
+
+## Early highly-unstable versions 
+
 - v0.0.9 (09/03/21) - fully working with PSV4.2.1 allowing inherent XMP data to be combined with sphere correction. Pan, tilt and roll are *corrections* to XMP data, NOT the raw values.
 
 - v0.0.8 (05/03/21) - adapt to work with PSV4.2  though useXmpData must be set to false; viewer.setPanorama() called back from transition module. 

@@ -44,6 +44,8 @@ import Viewer from './viewer.js';
 
 /* Changelog:
  *
+ * Please see CHANGELOG for versions beyond 0.0.9 
+ *
  * v0.0.9 (09/03/21) - fully working with PSV4.2.1 allowing inherent XMP
  * data to be combined with sphere correction. Pan, tilt and roll are
  * CORRECTIONS to XMP data, NOT the raw values.
