@@ -1,3 +1,5 @@
+import $ from 'jquery';
+
 /*
  * This code is Eesger Toering's transitions code, adapted to "plug in" to the
  * rest of the OpenWanderer jsapi.

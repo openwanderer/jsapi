@@ -1,6 +1,6 @@
 {
     "name": "openwanderer-jsapi",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "repository": {
         "type": "git",
         "url": "https://github.com/openwanderer/jsapi"
@@ -14,14 +14,17 @@
         "open source",
         "FOSS"
     ],
+    "dependencies": {
+        "photo-sphere-viewer": "4.2.1"
+    },
     "devDependencies": {
         "@babel/core": "^7.13.10",
         "@babel/preset-env": "^7.13.10",
         "babelify": "^10.0.0",
         "browserify": "^17.0.0"
     },
-	"scripts": {
-		"build": "browserify --standalone OpenWanderer index.js -o bundle.js -t [babelify --presets [@babel/preset-env] ]"
+    "scripts": {
+        "build": "browserify --standalone OpenWanderer index.js -o bundle.js -t [babelify --presets [@babel/preset-env] ]"
     },
     "unpkg": "bundle.js"
 }

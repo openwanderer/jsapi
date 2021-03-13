@@ -1,3 +1,5 @@
+import * as PhotoSphereViewer from 'photo-sphere-viewer';
+import MarkersPlugin  from 'photo-sphere-viewer/dist/plugins/markers';
 import { geodeticToEnu, enuPlusMarkerdata } from './coordtrans.js';
 
 /*
@@ -37,10 +39,10 @@ class Viewer {
             sphereCorrectionReorder: true,
             container: document.querySelector(container || '#viewer'),
             plugins: [
-                PhotoSphereViewer.MarkersPlugin
+                MarkersPlugin
             ]
         });
-        this.markersPlugin = this.psv.getPlugin(PhotoSphereViewer.MarkersPlugin);
+        this.markersPlugin = this.psv.getPlugin(MarkersPlugin);
         this.rotationLimits = {
             pan: [0, Math.PI*2],
             tilt: [-Math.PI*0.5, Math.PI*0.5],
