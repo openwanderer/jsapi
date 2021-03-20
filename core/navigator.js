@@ -75,13 +75,14 @@ class Navigator {
         options.api = options.api || { };
         this.sequences = [];
         this.panoMetadata = { };
+        this.loadSequence = null;
 
         if(options.sequence === undefined) {
-            this.loadSequence = async(seqid) => {
-                const seqResponse = await fetch(this.api.sequenceUrl.replace('{id}', seqid));
+            this.loadSequence = async(panoMetadata) => {
+                const seqResponse = await fetch(this.api.sequenceUrl.replace('{id}', panoMetadata.seqid));
                 const json = await seqResponse.json();
                 const result = { 
-                    seqid: seqid,
+                    seqid: panoMetadata.seqid,
                     panos: json
                 };
                 return result;
@@ -208,8 +209,8 @@ class Navigator {
         if(this.panoMetadata[id] && this.loadSequence && !this.panoMetadata[id].sequence) {
             if(!this.sequences[this.panoMetadata[id].seqid]) {
                 this.sequences[this.panoMetadata[id].seqid] = 
-                    await this.loadSequence( 
-                        this.panoMetadata[id].seqid
+                    await this.loadSequence(
+                        this.panoMetadata[id]
                     );
             }
             this._onLoadedSequence(
