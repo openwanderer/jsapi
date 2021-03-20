@@ -75,8 +75,9 @@ class Navigator {
         options.api = options.api || { };
         this.sequences = [];
         this.panoMetadata = { };
+        this.loadSequence = null;
 
-        if(!options.sequence) {
+        if(options.sequence === undefined) {
             this.loadSequence = async(seqid) => {
                 const seqResponse = await fetch(this.api.sequenceUrl.replace('{id}', seqid));
                 const json = await seqResponse.json();
@@ -103,16 +104,23 @@ class Navigator {
         this.api.nearest = this.api.nearest || 'nearest/{lon}/{lat}';
         this.svgEffects = options.svgEffects === undefined ? true: options.svgEffects;
         this.panoTransFunc = options.panoTransFunc || null;
+        this.pathClickHandler = options.pathClickHandler || (marker => {
+            let [seqid, idx] = marker.id.split('-').map(n => parseInt(n));
+            idx = idx < this.curPanoIdx ?  idx: idx+1;
+            return this.sequences[seqid].panos[idx].panoid;
+        });
+        this.markerClickHandler = options.markerClickHandler || (marker => {
+            return parseInt(marker.id.split('-')[2]);
+        });
+
         this.viewer.markersPlugin.on("select-marker", async (e, marker, data) => {
             let id;
             switch(marker.data.type) {
                 case 'path':
-                    let [seqid, idx] = marker.id.split('-').map(n => parseInt(n));
-                    idx = idx < this.curPanoIdx ?  idx: idx+1;
-                    id = this.sequences[seqid].panos[idx].panoid;
+                    id = this.pathClickHandler(marker);
                     break;
                 case 'marker':
-                    id = parseInt(marker.id.split('-')[2]);
+                    id = this.markerClickHandler(marker);
                     break;
             }
             if(id !== undefined) await this.loadPanorama(id);
@@ -205,11 +213,10 @@ class Navigator {
 
     async _loadMarkers(id) {    
         this.viewer.markersPlugin.clearMarkers();
-        if(!this.panoMetadata[id]) {
-        } else if(!this.panoMetadata[id].sequence) {
+        if(this.panoMetadata[id] && this.loadSequence && !this.panoMetadata[id].sequence) {
             if(!this.sequences[this.panoMetadata[id].seqid]) {
                 this.sequences[this.panoMetadata[id].seqid] = 
-                    await this.loadSequence( 
+                    await this.loadSequence(
                         this.panoMetadata[id].seqid
                     );
             }
@@ -250,6 +257,9 @@ class Navigator {
                     seqid: /*this.panoMetadata[origPanoId].*/sequence.seqid
                 }, pano);
             }
+            if(!this.panoMetadata[pano.panoid].sequence) {
+                this.panoMetadata[pano.panoid].sequence = sequence;
+            }
             if(pano.panoid == this.curPanoId) {
                 this.curPanoIdx = i;
             }
@@ -280,7 +290,7 @@ class Navigator {
     }
 
     _createPaths(id) {
-        if (this.panoMetadata[id].sequence.seqid > 0) {
+        if (this.panoMetadata[id].sequence && this.panoMetadata[id].sequence.seqid > 0) {
             const path = this.panoMetadata[id].sequence.panos.map ( pano => [pano.lon, pano.lat, parseFloat(pano.ele)] );
             this.panoMetadata[id].sequence.panos.forEach ( pano => {
                 pano.key = `marker-${id}-${pano.panoid}`;
