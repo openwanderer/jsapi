@@ -76,7 +76,7 @@ class Navigator {
         this.sequences = [];
         this.panoMetadata = { };
 
-        if(!options.sequence) {
+        if(options.sequence === undefined) {
             this.loadSequence = async(seqid) => {
                 const seqResponse = await fetch(this.api.sequenceUrl.replace('{id}', seqid));
                 const json = await seqResponse.json();
@@ -205,8 +205,7 @@ class Navigator {
 
     async _loadMarkers(id) {    
         this.viewer.markersPlugin.clearMarkers();
-        if(!this.panoMetadata[id]) {
-        } else if(!this.panoMetadata[id].sequence) {
+        if(this.panoMetadata[id] && this.loadSequence && !this.panoMetadata[id].sequence) {
             if(!this.sequences[this.panoMetadata[id].seqid]) {
                 this.sequences[this.panoMetadata[id].seqid] = 
                     await this.loadSequence( 
@@ -280,7 +279,7 @@ class Navigator {
     }
 
     _createPaths(id) {
-        if (this.panoMetadata[id].sequence.seqid > 0) {
+        if (this.panoMetadata[id].sequence && this.panoMetadata[id].sequence.seqid > 0) {
             const path = this.panoMetadata[id].sequence.panos.map ( pano => [pano.lon, pano.lat, parseFloat(pano.ele)] );
             this.panoMetadata[id].sequence.panos.forEach ( pano => {
                 pano.key = `marker-${id}-${pano.panoid}`;
