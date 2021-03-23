@@ -3,6 +3,8 @@ Changelog
 
 ## "Stable" versions (though still early in development)
 
+- v0.1.3 (23/03/21) - Eesger's SVG mouseover effects moved to `viewer.js` so that they can be used without a navigator. Also SVG mouseover colour can now be specified.
+
 - v0.1.2 (21/03/21) - minor updates: turn off sequences if 'sequence' option is defined but false (or technically, anything other than an array or function). Also allow custom marker and path click handlers.
 Bugfix when specifiying sequence as array.
 Fix examples to link to correct version of openwanderer-jsapi.

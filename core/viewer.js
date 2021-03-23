@@ -24,7 +24,7 @@ class Viewer {
      *
      * Takes a single argument: the CSS selector for the viewer's container.
      */
-    constructor(container) {
+    constructor(container, options = {}) {
         this.lon = 181;
         this.lat = 91;
         this.elev = 0;
@@ -48,6 +48,53 @@ class Viewer {
             tilt: [-Math.PI*0.5, Math.PI*0.5],
             roll: [-Math.PI, Math.PI]
         };
+
+        this.svgEffects = options.svgEffects === undefined ? true: options.svgEffects;
+        this.svgOver = options.svgOver || { red: 255, green: 255, blue: 0 };
+
+        // SVG was developed by Eesger Toering
+        if(this.svgEffects) {
+            const svgString = `rgba(${this.svgOver.red},${this.svgOver.green},${this.svgOver.blue}`;
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttributeNS(null, 'height', 1);
+            svg.setAttributeNS(null, 'width', 1);
+            svg.style.position = 'absolute';
+            svg.style.top = '-1px';
+            svg.style.left = '-1px';
+            svg.innerHTML = '<defs>' +
+                '<radialGradient id="GAgradient1" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">' +
+                ` <stop offset="0%" stop-color="${svgString},1.0)"/>` + 
+                ` <stop offset="25%"  stop-color="${svgString},1.0)"/>` +
+                ` <stop offset="100%" stop-color="${svgString},0.4)"/>`+
+                ' </radialGradient>' +
+                ' <radialGradient id="GAgradient0" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">' +
+                ` <stop offset="0%"   stop-color="${svgString}, 0.5)"/>`+
+                ` <stop offset="100%" stop-color="${svgString}, 0.5)"/>` +
+                ' </radialGradient>' +
+                '<linearGradient id="GAgradient0T" x2="0" y2="1">' +
+                `<stop offset="0%"   stop-color="${svgString}, 0.35)"/>` +
+                `<stop offset="100%" stop-color="${svgString}, 0.35)"/>` +
+                ' </linearGradient>' +
+                '<linearGradient id="GAgradient2T" x2="0" y2="1">' +
+                `<stop offset="0%"   stop-color="${svgString}, 0.35)"/>` +
+                ` <stop offset="10%"  stop-color="${svgString}, 0.35)"/>` + 
+                ` <stop offset="100%" stop-color="${svgString}, 0.85)"/>`+
+                ' </linearGradient>' +
+                ' <linearGradient id="GAgradient3T" x2="0" y2="1">' +
+                `<stop offset="0%"   stop-color="${svgString}, 0.85)"/>` +
+                `<stop offset="90%"  stop-color="${svgString}, 0.35)"/>` +
+                `<stop offset="100%" stop-color="${svgString}, 0.35)"/>` +
+                '</linearGradient>' +
+                '</defs>';
+            document.body.appendChild(svg);
+        }
+        this.markersPlugin.on('over-marker', (e, marker) => {
+            this._markerOver(marker.id);
+        });
+            
+        this.markersPlugin.on('leave-marker', (e, marker) => {
+            this._markerLeave(marker.id);
+        });
     }
 
     /* setLonLat()
@@ -352,6 +399,59 @@ class Viewer {
             ]);
         }
         return multipolygon;
+    }
+
+    // Code originally by Eesger Toering; modified
+    _markerOver(markerID) {
+        if (!this.svgEffects) return;
+
+        const marker = this.markersPlugin.markers[markerID];
+        if (!marker
+            ||  marker.type == 'image'
+            || !marker.config.svgStyle
+            || !marker.config.svgStyle.fill) { 
+            return; 
+         }
+
+         if (this.markerBaseFill === undefined) {
+             this.markerBaseFill = marker.config.svgStyle.fill;
+         }
+         let fillNew = 'url(#GAgradient1)';
+
+  
+         this.markersPlugin.updateMarker({
+            id   : markerID,
+            svgStyle : {
+                  fill       : fillNew,
+                  stroke     : this.markerBaseFill.replace(/([0-9.]+)\)/, 
+                    (x,y)=> parseFloat(y)/4+')' 
+                   ),
+              strokeWidth: '1px',//'0.1em',
+            },
+         });
+    }
+
+    // Code originally by Eesger Toering; modified
+    _markerLeave(markerID) {  
+        if (!this.svgEffects) return;
+
+        const marker = this.markersPlugin.markers[markerID];
+  
+        let fillNew = this.markerBaseFill;
+        if (!marker
+            ||  marker.type == 'image'
+            || !marker.config.svgStyle
+            || !marker.config.svgStyle.fill) { 
+            return; 
+        }
+
+
+        this.markersPlugin.updateMarker({
+            id   : markerID,
+            svgStyle : {
+                 fill       : fillNew,
+            },
+        });
     }
 }
 
