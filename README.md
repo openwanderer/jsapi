@@ -41,7 +41,7 @@ Again, include with unpkg. You also need jQuery as the transitions API requires 
 
 ### Application widget
 
-The application widget (the `openwanderer-app` package on NPM) allows you to easily create a simple, yet full, OpenWanderer-based application featuring navigation, map view (OpenStreetMap maps provided by OpenTopoMap), login and signup functionality, upload functionality, controls to adjust the pan, tilt and roll of the current panorama, and controls to select, rotate, drag and delete any panorama on the map view.
+The application widget (the `openwanderer-app` package on NPM) allows you to easily create a simple, yet full, OpenWanderer-based application featuring navigation, map view (OpenStreetMap maps provided by OpenTopoMap), login and signup functionality, upload functionality, controls to adjust the pan, tilt and roll of the current panorama, and controls to select, rotate, drag and delete any panorama on the map view. **It will only work with a [server](https://github.com/openwanderer/server) set up.**
 
 You need to create an `OWApp.App` object. Quite a few options must be specified. In particular, you need to specify the icons to be used for controls, and the containers needed for the widget's UI elements. **It is up to you to style and position these containers and provide the icons - the package will not do it for you**. Here is an example:
 
