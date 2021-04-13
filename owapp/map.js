@@ -8,6 +8,7 @@ class MapManager {
         this.userProvider = options.userProvider;
         this.onPanoMarkerClick = options.onPanoMarkerClick;
         this.markerClusterGroup = L.markerClusterGroup({disableClusteringAtZoom: 14});
+        this.cameraIcon = options.cameraIcon;
         this.setupLeafletMap(options.zoom || 16);
         this.onPanoChange = options.onPanoChange;
         this.onMapChange = options.onMapChange || null;
@@ -17,7 +18,7 @@ class MapManager {
 
     setupLeafletMap(zoom) {
         if(!this.map) {
-            this.map = L.map('map', {maxZoom:20});
+            this.map = L.map('ow_map', {maxZoom:20});
             this.map.setZoom(zoom);
             this.map.addLayer(this.markerClusterGroup);
             this.layer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {attribution: 'Map data (c)OpenStreetMap contributors, ODBL; contours SRTM | Map display: &copy; OpenTopoMap (CC-By-SA)', maxZoom: 20, maxNativeZoom: 16});
@@ -80,9 +81,9 @@ class MapManager {
 
     setupGeojsonLayer() {
         if(!this.geojsonLayer) {
-            
+           
             var cameraIcon = L.icon({
-                iconUrl: 'images/camera.png',
+                iconUrl: this.cameraIcon, 
                 iconSize:[24,24],
                 iconAnchor:[12,12],
                 popupAnchor:[8,8]

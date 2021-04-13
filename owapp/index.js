@@ -3,30 +3,29 @@ import XHRPromise from './xhrpromise.js';
 import { Dialog } from 'jsfreemaplib';
 
 class App {
-    constructor(options = {}) {
-        this.controls = options.controls || {
-            'select' : 'images/cursor-default-click.png',
-            'rotate' : 'images/baseline_rotate_right_white_18dp.png',
-            'drag'   : 'images/drag-variant.png',
-            'delete' : 'images/baseline_delete_white_18dp.png',        
-            'search' : 'images/search.png',
-            'switchModeImg' : ['images/baseline_panorama_white_18dp.png', 'images/baseline_map_white_18dp.png']
-        };
-        this.loginContainer = options.loginContainer || 'loginContainer';
+    constructor(options) {
+        if(!options) {
+            throw "Options not provided, please specify all required options.";
+        }
+        this.controls = options.controlIcons;
+        this.loginContainer = options.loginContainer;
+        this.setupMapPreviewCss();
         this.setupNavigator(options.navigator);
-        this.setupControls(options.controlContainer || 'controlContainer', this.controls);
-        this.searchContainer = options.searchContainer || 'searchContainer';
-        this.rotateControlsContainer = options.rotateControlsContainer || 'rotateControlsContainer';
-        this.uploadContainer = options.uploadContainer || 'uploadContainer';
-        this.dialogParent = options.dialogParent || 'main';
+        this.setupControls(options.controlContainer, options.controlIcons);
+        this.searchContainer = options.searchContainer;
+        this.rotateControlsContainer = options.rotateControlsContainer;
+        this.uploadContainer = options.uploadContainer;
+        this.dialogParent = options.dialogParent || document.body;
         this.setupSearchControl();
         this.setupRotateControls();
         this.setupUploadForm();
-        this.panoEl = options.panoEl || 'pano';
-        this.mapEl = options.mapEl || 'map';
+        this.panoEl = this.navigator.viewer.psv.parent;
+        this.mapEl = document.createElement("div");
+        this.mapEl.id = "ow_map";
+        this.panoEl.parentElement.appendChild(this.mapEl);
         this.setupMediaQueries();
         this.setupUpload();
-        this.setupMap(options.zoom || 16);
+        this.setupMap(options.zoom || 16, options.cameraIcon);
         this.setupModes();
         this.navigator.on('locationChanged',(lon,lat)=> {
             this.lon = lon;
@@ -43,6 +42,17 @@ class App {
         this.setupRotation();
         this.lat = -181;
         this.lon = -91;
+    }
+
+    setupMapPreviewCss() {
+        const style = document.createElement("style");
+        style.type = 'text/css';
+        style.innerHTML = `#ow_map.preview {${this.getMapPreviewCss()} }`;
+        document.querySelector("head").appendChild(style);
+    }
+
+    getMapPreviewCss() {
+        return 'left: calc(100% - 200px); bottom: 0px; width:200px; height: 200px; display: block; position: absolute';
     }
 
     setupNavigator(nav) {
@@ -72,7 +82,7 @@ class App {
                           'rotate': 'Rotate panoramas',    
                           'drag': 'Move panoramas',
                          'delete' : 'Delete panorama', 
-                        'switchModeImg' : 'Map'};
+                        'switchMode' : 'Map'};
 
         for(const id in controls) {
             if(data[id]) {
@@ -96,7 +106,7 @@ class App {
     }
 
     setupModes () {
-        document.getElementById("ow_switchModeImg").addEventListener("click", this.switchMode.bind(this));
+        document.getElementById("ow_switchMode").addEventListener("click", this.switchMode.bind(this));
         this.setupMode(0);
     }
 
@@ -105,15 +115,15 @@ class App {
     }
 
     setupMode(newMode, loadCentrePano=true) {
-        const images = this.controls.switchModeImg, alts = ['Panorama', 'Map'];
-        document.getElementById('ow_switchModeImg').src = images[newMode==0 ? 1:0];
-        document.getElementById('ow_switchModeImg').alt = alts[newMode==0 ? 1:0];
-        document.getElementById('ow_switchModeImg').title = alts[newMode==0 ? 1:0];
+        const images = this.controls.switchMode, alts = ['Panorama', 'Map'];
+        document.getElementById('ow_switchMode').src = images[newMode==0 ? 1:0];
+        document.getElementById('ow_switchMode').alt = alts[newMode==0 ? 1:0];
+        document.getElementById('ow_switchMode').title = alts[newMode==0 ? 1:0];
         
 
         switch(newMode) {
             case 0:
-                document.getElementById(this.panoEl).style.display = 'block';
+                this.panoEl.style.display = 'block';
                 document.getElementById('ow_drag').style.display = 'none';
                 document.getElementById('ow_rotate').style.display = 'none';
                 document.getElementById('ow_delete').style.display = 'none';
@@ -130,12 +140,16 @@ class App {
                     });
                 }
                 
+                if(this.userid) {
+                    document.getElementById(this.uploadContainer).style.display = "block";
+                    document.getElementById(this.rotateControlsContainer).style.display = "block";
+                }
                 break;
 
             case 1:
                 
-                document.getElementById(this.panoEl).style.display = 'none';
-                document.getElementById(this.mapEl).classList.remove('preview');
+                this.panoEl.style.display = 'none';
+                this.mapEl.classList.remove('preview');
                 this.mapMgr.map.invalidateSize();
                 document.getElementById('ow_select').style.display = 'inline';
                 document.getElementById(this.searchContainer).style.display = 'block';
@@ -144,6 +158,8 @@ class App {
                     document.getElementById('ow_rotate').style.display = 'inline';
                     document.getElementById('ow_delete').style.display = 'inline';
                 }
+                document.getElementById(this.uploadContainer).style.display = "none";
+                document.getElementById(this.rotateControlsContainer).style.display = "none";
                 this.mapMgr.setView([this.lat, this.lon]);
                 break;
 
@@ -151,7 +167,7 @@ class App {
         this.mode = newMode;
     }
 
-    setupMap(zoom) {
+    setupMap(zoom, cameraIcon) {
 
         if(!this.mapMgr) {
             this.mapMgr = new MapManager({userProvider: this,
@@ -166,7 +182,8 @@ class App {
                                         localStorage.setItem('zoom', zoom);
                                     
                                 },
-                                zoom: zoom
+                                zoom: zoom,
+                                cameraIcon: cameraIcon
                             });
             document.getElementById("ow_select").addEventListener("click", 
                 this.selectPanoChangeMode.bind(this, 0));
@@ -329,7 +346,7 @@ class App {
     }
 
     setupMapPreview() {
-        document.getElementById(this.mapEl).classList.add('preview');
+        this.mapEl.classList.add('preview');
         this.mapMgr.map.invalidateSize();
     }
     
@@ -502,12 +519,13 @@ class App {
         a.appendChild(document.createTextNode(" "));
         a.appendChild(document.createTextNode("Logout"));
         document.getElementById(this.loginContainer).appendChild(a);
-        document.getElementById(this.uploadContainer).style.display = "block";
-        document.getElementById(this.rotateControlsContainer).style.display = "block";
         if(this.mode == 1) {
             document.getElementById("ow_drag").style.display = "inline";
             document.getElementById("ow_rotate").style.display = "inline";
             document.getElementById("ow_delete").style.display = "inline";
+        } else {
+            document.getElementById(this.uploadContainer).style.display = "block";
+            document.getElementById(this.rotateControlsContainer).style.display = "block";
         }
         this.mapMgr.activated = true;    
     }
