@@ -1,0 +1,24 @@
+{
+    "name": "openwanderer-app",
+    "version": "0.0.1",
+    "repository": {    
+        "type": "git",
+        "url": "https://github.com/openwanderer/jsapi"
+    },
+    "description": "A complete OpenWanderer front-end application widget capable of navigation, viewing panos on a map, adjusting panos, login and upload.",
+    "license": "LGPL-3.0-or-later",
+    "dependencies": {
+        "jsfreemaplib": "^0.4.0",
+        "leaflet-rotatedmarker": "^0.2.0"
+    },
+    "devDependencies": {
+        "@babel/core": "^7.13.10",
+        "@babel/preset-env": "^7.13.10",
+        "babelify": "^10.0.0",
+        "browserify": "^17.0.0"
+    },
+    "scripts": {
+        "build": "browserify --standalone OWApp index.js -o bundle.js -t [babelify --presets [@babel/preset-env] ]"
+    },
+    "unpkg": "bundle.js"
+}
