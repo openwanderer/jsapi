@@ -1,9 +1,11 @@
+import Eventable from './eventable.js';
 import MapManager from './map.js';
 import XHRPromise from './xhrpromise.js';
 import { Dialog } from 'jsfreemaplib';
 
-class App {
+class App extends Eventable {
     constructor(options) {
+        super();
         if(!options) {
             throw "Options not provided, please specify all required options.";
         }
@@ -44,15 +46,29 @@ class App {
         this.lon = -91;
     }
 
+    on(eventName, cb) {
+        if(eventName == 'deletePano') {
+            this.mapMgr.on(eventName, cb); 
+        } else {
+            super.on(eventName, cb);
+        }
+    }
+
     setupMapPreviewCss() {
         const style = document.createElement("style");
         style.type = 'text/css';
-        style.innerHTML = `#ow_map.preview {${this.getMapPreviewCss()} }`;
+        const css = this.getMapPreviewCss();
+        style.innerHTML = `#ow_map {z-index: 999; overflow: hidden; ${css.normal} }\n`;
+        style.innerHTML += `#ow_map.preview {${css.preview} }\n`;
+        style.innerHTML += '#ow_map a { color: blue }\n';
         document.querySelector("head").appendChild(style);
     }
 
     getMapPreviewCss() {
-        return 'left: calc(100% - 200px); bottom: 0px; width:200px; height: 200px; display: block; position: absolute';
+        return {
+            preview: 'left: calc(100% - 200px); bottom: 0px; width:200px; height: 200px; display: block; position: absolute',
+            normal:  'position: absolute; width: 100%; height: 100%; left: 0%;'
+        }
     }
 
     setupNavigator(nav) {
@@ -387,7 +403,14 @@ class App {
             }
         })
         .then(response => {
-            alert(response.status == 200 ? 'Saved new rotation': (response.status == 401 ? 'This is not your panorama.' : `HTTP error: ${response.status}`));
+            if(response.status == 200) {
+                if(this.events.rotationSaved) {
+                    this.events.rotationSaved(orientations);
+                    alert('Saved new rotation');
+                } else {
+                    alert(response.status == 401 ? 'This is not your panorama.' : `HTTP error: ${response.status}`);
+                }
+            }
         })
         .catch(e => {
             alert(`ERROR: ${e}`);
@@ -470,6 +493,9 @@ class App {
                     this.isadmin = json.isadmin;
                     this.loginDlg.hide();
                     this.onLoginStateChange();
+                    if(this.events.login) {
+                        this.events.login(json);
+                    }
                 }
              })
             .catch(e => { 
@@ -558,6 +584,9 @@ class App {
             this.username = null;
             this.userid = this.isadmin = 0; 
             this.onLoginStateChange();
+            if(this.events.logout) {
+                this.events.logout();
+            }
         });
     }
 }

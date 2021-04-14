@@ -1,7 +1,9 @@
+import Eventable from './eventable.js';
 import './node_modules/leaflet-rotatedmarker/leaflet.rotatedMarker.js';
 
-class MapManager {
+class MapManager extends Eventable {
     constructor(options) {
+        super();
         this.indexedFeatures = [];
         this.activated = false;
         this.panoChangeMode = 0;
@@ -202,6 +204,9 @@ class MapManager {
                     layer.removeFrom(this.map);
                     this.markerClusterGroup.removeLayer(layer);
                     alert('Panorama deleted.'); 
+                    if(this.events.deletePano) {
+                        this.events.deletePano(f.properties.id);
+                    }
                 } else {
                     alert(`Error deleting panorama: code ${response.status}`); 
                 }
