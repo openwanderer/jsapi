@@ -118,7 +118,9 @@ class App extends Eventable {
 
 
     setupUploadForm() {
-        document.getElementById(this.uploadContainer).innerHTML = "<form method='post' enctype='multipart/form-data'> <fieldset style='width: 800px; border: 1px solid black; padding: 0px'> <legend>Upload panoramas:</legend> Select your file(s): <input type='file' id='ow_panoFiles' multiple /><br /> <progress id='ow_progress' value='0' max='100' style='width: 90%'></progress><br /> <span id='ow_uploadProgress'></span><br /> <input type='button' id='uploadBtn' value='Upload!'> </fieldset> </form> <p id='ow_uploadStatus'></p>";
+        if(this.uploadContainer) {
+            document.getElementById(this.uploadContainer).innerHTML = "<form method='post' enctype='multipart/form-data'> <fieldset style='width: 800px; border: 1px solid black; padding: 0px'> <legend>Upload panoramas:</legend> Select your file(s): <input type='file' id='ow_panoFiles' multiple /><br /> <progress id='ow_progress' value='0' max='100' style='width: 90%'></progress><br /> <span id='ow_uploadProgress'></span><br /> <input type='button' id='ow_uploadBtn' value='Upload!'> </fieldset> </form> <p id='ow_uploadStatus'></p>";
+        }
     }
 
     setupModes () {
@@ -157,7 +159,9 @@ class App extends Eventable {
                 }
                 
                 if(this.userid) {
-                    document.getElementById(this.uploadContainer).style.display = "block";
+                    if(this.uploadContainer) {
+                        document.getElementById(this.uploadContainer).style.display = "block";
+                    }
                     document.getElementById(this.rotateControlsContainer).style.display = "block";
                 }
                 break;
@@ -174,7 +178,9 @@ class App extends Eventable {
                     document.getElementById('ow_rotate').style.display = 'inline';
                     document.getElementById('ow_delete').style.display = 'inline';
                 }
-                document.getElementById(this.uploadContainer).style.display = "none";
+                if(this.uploadContainer) {
+                    document.getElementById(this.uploadContainer).style.display = "none";
+                }
                 document.getElementById(this.rotateControlsContainer).style.display = "none";
                 this.mapMgr.setView([this.lat, this.lon]);
                 break;
@@ -245,7 +251,10 @@ class App extends Eventable {
             
 
     setupUpload () {
-        document.getElementById('uploadBtn').addEventListener("click", async(e) => {
+        if(!this.uploadContainer) {
+            throw `Cannot use default setupUpload() without an uploadContainer! Please subclass App and override setupUpload()`;
+        }
+        document.getElementById('ow_uploadBtn').addEventListener("click", async(e) => {
             const panofiles = document.getElementById("ow_panoFiles").files;
             if(panofiles.length == 0) {
                 alert('No files selected!');
@@ -550,7 +559,9 @@ class App extends Eventable {
             document.getElementById("ow_rotate").style.display = "inline";
             document.getElementById("ow_delete").style.display = "inline";
         } else {
-            document.getElementById(this.uploadContainer).style.display = "block";
+            if(this.uploadContainer) {
+                document.getElementById(this.uploadContainer).style.display = "block";
+            }
             document.getElementById(this.rotateControlsContainer).style.display = "block";
         }
         this.mapMgr.activated = true;    
@@ -571,7 +582,9 @@ class App extends Eventable {
         document.getElementById(this.loginContainer).appendChild(as);
         document.getElementById(this.loginContainer).appendChild(document.createTextNode(" | "));
         document.getElementById(this.loginContainer).appendChild(al);
-        document.getElementById(this.uploadContainer).style.display = "none";
+        if(this.uploadContainer) {
+            document.getElementById(this.uploadContainer).style.display = "none";
+        }
         document.getElementById(this.rotateControlsContainer).style.display = "none";
         document.getElementById("ow_drag").style.display = "none";
         document.getElementById("ow_rotate").style.display = "none";

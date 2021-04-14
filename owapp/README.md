@@ -41,7 +41,7 @@ Note the options. All are required unless marked as optional.
 
 - `rotateControlsContainer` : a container to hold the pan, tilt and roll adjustment controls.
 
-- `uploadContainer` : a container to hold the upload form:
+- `uploadContainer` (optional) : a container to hold the upload form. If not supplied, it is assuming you are providing your own upload functionality (e.g. via an upload dialog). If this is the case, **you must subclass the `OWApp.App` object and override the `setupUpload()` method to include your own upload functionality**. If you do not, the application will throw an error.
 
 - `dialogParent` (optional) : various dialogs are created, notably for signup and login. This is the element which will act as the parent element to the dialogs created. If not specified, `document.body` will be used.
 
