@@ -9,9 +9,19 @@ class App extends Eventable {
         if(!options) {
             throw "Options not provided, please specify all required options.";
         }
+        options.css = options.css || { };
+        this.dialogStyle = options.dialogStyle || {
+            backgroundColor: 'rgba(128,64,0)',
+            color: 'white'
+        };
         this.controls = options.controlIcons;
         this.loginContainer = options.loginContainer;
-        this.setupMapPreviewCss();
+        const css = {
+             signup: options.css.signup || `left: 25%; top: 10%; width: 600px; height: 400px; `, 
+             login: options.css.login || `left: 37%; top: 25%; width: 25%; height: 288px; `,
+             mapPreview: options.css.mapPreview || 'left: calc(100% - 200px); bottom: 0px; width:200px; height: 200px; display: block; position: absolute'
+        };
+        this.setupCss(css);
         this.setupNavigator(options.navigator);
         this.setupControls(options.controlContainer, options.controlIcons);
         this.searchContainer = options.searchContainer;
@@ -54,21 +64,21 @@ class App extends Eventable {
         }
     }
 
-    setupMapPreviewCss() {
+    setupCss(customisableCss) {
         const style = document.createElement("style");
         style.type = 'text/css';
-        const css = this.getMapPreviewCss();
-        style.innerHTML = `#ow_map {z-index: 999; overflow: hidden; ${css.normal} }\n`;
-        style.innerHTML += `#ow_map.preview {${css.preview} }\n`;
+        style.innerHTML = '#ow_map {z-index: 999; overflow: hidden; position: absolute; width: 100%; height: 100%; left: 0%;}';
+        style.innerHTML += `#ow_map.preview {${customisableCss.mapPreview} }\n`;
         style.innerHTML += '#ow_map a { color: blue }\n';
-        document.querySelector("head").appendChild(style);
-    }
+        style.innerHTML += `#ow_dlgSignup {${customisableCss.signup}; position: absolute }`; 
+        style.innerHTML += `#ow_dlgLogin {${customisableCss.login}; position: absolute }`;
+        style.innerHTML += '#ow_search { padding: 5px; margin-bottom: 0px; }';
+        style.innerHTML += '#ow_searchResults { background-color: white; color: black; margin-top: 0px; }';
+        style.innerHTML += '#ow_searchResults a { color: blue; margin-bottom: 5px; }';
+        style.innerHTML += '#ow_imageContainer { float: right; }';
+        style.innerHTML += '#ow_searchBtn { right: 0px; }';
 
-    getMapPreviewCss() {
-        return {
-            preview: 'left: calc(100% - 200px); bottom: 0px; width:200px; height: 200px; display: block; position: absolute',
-            normal:  'position: absolute; width: 100%; height: 100%; left: 0%;'
-        }
+        document.querySelector("head").appendChild(style);
     }
 
     setupNavigator(nav) {
@@ -430,10 +440,8 @@ class App extends Eventable {
         this.loginDlg = new Dialog(this.dialogParent,
                 { 'Login': this.processLogin.bind(this),
                 'Cancel': ()=> { this.loginDlg.hide(); }},
-                {
-                backgroundColor: "rgba(128,64,0)",
-                color: "white",
-                textAlign: "center" });
+                this.dialogStyle,
+                { textAlign: "center" });
         this.loginDlg.setContent('<h2>Login</h2>'+
             "<p><span id='ow_loginError' class='error'></span><br />"+
             "<label for='ow_username'>Email address</label><br />" +
@@ -458,10 +466,9 @@ class App extends Eventable {
         this.signupDlg = new Dialog(this.dialogParent,
                 { 'Signup': this.processSignup.bind(this),
                 'Close': ()=> { this.signupDlg.hide(); }},
+                this.dialogStyle,
                 {
-    
-                backgroundColor: "rgba(128,64,0)",
-                color: "white", padding: '10px',
+                padding: '10px',
                 textAlign: "center" });
         this.signupDlg.setContent(
 "<h2>Sign up</h2>"+

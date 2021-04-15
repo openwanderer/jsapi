@@ -2,7 +2,7 @@
 
 The application widget (the `openwanderer-app` package on NPM) allows you to easily create a simple, yet full, OpenWanderer-based application featuring navigation, map view (OpenStreetMap maps provided by OpenTopoMap), login and signup functionality, upload functionality, controls to adjust the pan, tilt and roll of the current panorama, and controls to select, rotate, drag and delete any panorama on the map view. **It will only work with a [server](https://github.com/openwanderer/server) set up.**
 
-You need to create an `OWApp.App` object. Quite a few options must be specified. In particular, you need to specify the icons to be used for controls, and the containers needed for the widget's UI elements. **It is up to you to style and position these containers and provide the icons - the package will not do it for you**. This is a deliberate decision, to avoid imposing a particular visual design and layout on apps making use of this package. Here is an example:
+You need to create an `OWApp.App` object. Quite a few options must be specified. In particular, you need to specify the icons to be used for controls, and the containers needed for the widget's UI elements. **It is up to you to style and position these containers and provide the icons - the package will not do it for you**. This is a deliberate decision, to avoid imposing a particular visual design and layout on apps making use of this package (though the signup and login dialogs do have default, albeit customisable, styles). Here is an example:
 
 ```
 const app = new OWApp.App({
@@ -47,6 +47,30 @@ Note the options. All are required unless marked as optional.
 
 - `navigator` (optional) : an `OpenWanderer.Navigator` object to use for displaying and navigating between panoramas. If not specified, a navigator will be created for you. The navigator can later be accessed using the `navigator` property of the `App` object.
 
+- `dialogStyle` (optional) : allows you to setup the background and text colours of the signup and login dialogs, otherwise default colours will be used. For example:
+
+```
+const app = new OWApp.App({
+    // ...,
+    dialogStyle: {
+        backgroundColor: 'rgba(128,64,0)',
+        color: 'white'
+    }
+});
+```
+
+- `css` (optional) : allows you to specify CSS rules for the signup and login dialogs and the map preview window (a small map visible in panorama mode showing your current location). For example:
+
+```
+const app = new OWApp.App({
+    // ...,
+    css: { 
+         signup: 'left: 25%; top: 10%; width: 600px; height: 400px; ', 
+         login: 'left: 37%; top: 25%; width: 25%; height: 288px; ',
+         mapPreview: 'left: calc(100% - 200px); bottom: 0px; width:200px; height: 200px; display: block; position: absolute'
+    };
+});
+```
 
 ## Events
 
