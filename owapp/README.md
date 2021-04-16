@@ -72,6 +72,15 @@ const app = new OWApp.App({
 });
 ```
 
+- `api` (optional) : object, allowing specification of APIs to be used for functionality such as login/logout, signup, and panorama move, rotation and deletion. By default the endpoints provided by the OpenWanderer server can be used but they can be customised. Note that the API specifications use the `{id}` placeholder for panorama ID. The accepted suboptions of `api` are:
+    - `move` : API for moving panoramas (default `panorama/{id}/move`)
+    - `rotate` : API for moving panoramas (default `panorama/{id}/rotate`)
+    - `del` : API for deleting panoramas (default `panorama/{id}/delete`)
+    - `login` : API for logging in/getting information about the current user (default `user/login`)
+    - `logout` : API for logging out (default `user/logout`)
+    - `signup` : API for signing up (default `user/signup`)
+    - `panos` : API for providing all panos within a bounding box (default `panos`; takes a `bbox` parameter containing w,s,e,n)
+
 ## Events
 
 The application widget emits certain events. Event handlers can be setup with `on()`, for example:

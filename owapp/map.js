@@ -1,5 +1,6 @@
 import Eventable from './eventable.js';
-import './node_modules/leaflet-rotatedmarker/leaflet.rotatedMarker.js';
+//import './node_modules/leaflet-rotatedmarker/leaflet.rotatedMarker.js';
+import 'leaflet-rotatedmarker';
 
 class MapManager extends Eventable {
     constructor(options) {
@@ -15,6 +16,12 @@ class MapManager extends Eventable {
         this.onPanoChange = options.onPanoChange;
         this.onMapChange = options.onMapChange || null;
         this.panoMarkers = {};
+        this.api = options.api || {};
+        this.api.panos = this.api.panos || 'panos';
+        this.api.move = this.api.move || 'panorama/{id}/move';
+        this.api.rotate = this.api.rotate || 'panorama/{id}/rotate';
+        this.api.del = this.api.del || 'panorama/{id}';
+        
         this.initialised = false;
     }
 
@@ -71,7 +78,7 @@ class MapManager extends Eventable {
         var e = this.map.getBounds().getNorthEast().lng;    
         var n = this.map.getBounds().getNorthEast().lat;    
         
-        var resp = fetch(`panos?bbox=${w},${s},${e},${n}`).then(resp=>resp.json()).then(json=> {
+        var resp = fetch(`${this.api.panos}?bbox=${w},${s},${e},${n}`).then(resp=>resp.json()).then(json=> {
             json.features.forEach( f=> { 
                 if(!this.indexedFeatures[f.properties.id]) {
                     this.geojsonLayer.addData(f); 
@@ -149,7 +156,7 @@ class MapManager extends Eventable {
                     layer.on("dragend", e=> {
 
                         if(this.activated && this.panoChangeMode==2 && (f.properties.userid==this.userProvider.userid || this.userProvider.isadmin==1)) {
-                            fetch(`panorama/${f.properties.id}/move`,
+                            fetch(`${this.api.move.replace('{id}', f.properties.id)}`,
                                 { body: JSON.stringify(
                                     {lat:layer.getLatLng().lat, lon:layer.getLatLng().lng}),
                                 headers: { 'Content-Type': 'application/json'},
@@ -178,7 +185,7 @@ class MapManager extends Eventable {
             clearInterval(this.timer);
             this.timer = null;
             this.map.dragging.enable();
-            fetch(`panorama/${f.properties.id}/rotate`,
+            fetch(`${this.api.rotate.replace('{id}', f.properties.id)}`,
                 { body: JSON.stringify(
                     {pan:(layer.options.rotationAngle - layer.rotationProperties.poseheadingdegrees) % 360, tilt: layer.rotationProperties.tilt, roll: layer.rotationProperties.roll }
                 ), 
@@ -198,7 +205,7 @@ class MapManager extends Eventable {
     }
 
     deletePano(f, layer) {
-        fetch(`panorama/${f.properties.id}`, { method: 'DELETE' })
+        fetch(`${this.api.del.replace('{id}', f.properties.id)}`, { method: 'DELETE' })
             .then(response => {
                 if(response.status == 200) {
                     layer.removeFrom(this.map);

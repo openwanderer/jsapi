@@ -21,6 +21,11 @@ class App extends Eventable {
              login: options.css.login || `left: 37%; top: 25%; width: 25%; height: 288px; `,
              mapPreview: options.css.mapPreview || 'left: calc(100% - 200px); bottom: 0px; width:200px; height: 200px; display: block; position: absolute'
         };
+        this.api = options.api || {};
+        this.api.login = this.api.login || 'user/login';
+        this.api.signup = this.api.signup || 'user/signup';
+        this.api.logout = this.api.logout || 'user/logout';
+        this.api.rotate = this.api.rotate || 'panorama/{id}/rotate';
         this.setupCss(css);
         this.setupNavigator(options.navigator);
         this.setupControls(options.controlContainer, options.controlIcons);
@@ -215,7 +220,13 @@ class App extends Eventable {
                                     
                                 },
                                 zoom: zoom,
-                                cameraIcon: cameraIcon
+                                cameraIcon: cameraIcon,
+                                api: {
+                                    move: this.api.move,
+                                    rotate: this.api.rotate,
+                                    del: this.api.del,
+                                    panos: this.api.panos
+                                }
                             });
             document.getElementById("ow_select").addEventListener("click", 
                 this.selectPanoChangeMode.bind(this, 0));
@@ -414,7 +425,7 @@ class App extends Eventable {
         Object.keys(orientations).map ( k => { 
             orientations[k] *= 180/Math.PI; 
         });
-        fetch(`panorama/${this.navigator.curPanoId}/rotate`, {
+        fetch(this.api.rotate.replace('{id}',this.navigator.curPanoId), {
             method: 'POST',
             body: JSON.stringify(orientations),
             headers: {
@@ -450,7 +461,7 @@ class App extends Eventable {
             "<input id='ow_password' type='password' /> </p>");
         this.loginDlg.div.id='ow_dlgLogin';
         
-        fetch ('user/login').then(resp => resp.json()).then(json => {
+        fetch (this.api.login).then(resp => resp.json()).then(json => {
                 this.username = json.username;
                 this.userid = json.userid;
                 this.isadmin = json.isadmin;
@@ -493,7 +504,7 @@ class App extends Eventable {
 
     processLogin() {
         var json=JSON.stringify({"username": document.getElementById("ow_username").value,  "password": document.getElementById("ow_password").value});
-        fetch('user/login', { method: 'POST', headers: {'Content-Type': 'application/json'}, body:json})
+        fetch(this.api.login, { method: 'POST', headers: {'Content-Type': 'application/json'}, body:json})
             .then(res => {
                 if(res.status == 401) {
                    throw('Incorrect login.');
@@ -521,7 +532,7 @@ class App extends Eventable {
 
     processSignup() {
         var json=JSON.stringify({"username": document.getElementById("ow_signup_username").value,  "password": document.getElementById("ow_signup_password").value, "ow_password2": document.getElementById("ow_password2").value});
-        fetch('user/signup', { method: 'POST', headers: {'Content-Type': 'application/json'}, body:json})
+        fetch(this.api.signup, { method: 'POST', headers: {'Content-Type': 'application/json'}, body:json})
                 .then(res => res.json())
                 .then(json => {
                     if(json.error) {
@@ -600,7 +611,7 @@ class App extends Eventable {
     } 
 
     logout() {
-        fetch('user/logout', {method:"POST"}).then(resp=> {
+        fetch(this.api.logout, {method:"POST"}).then(resp=> {
             this.username = null;
             this.userid = this.isadmin = 0; 
             this.onLoginStateChange();
