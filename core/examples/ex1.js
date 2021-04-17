@@ -6,7 +6,9 @@
  *
  */ 
 
-const viewer = new OpenWanderer.Viewer('#pano');
+import * as OpenWanderer from 'openwanderer-jsapi';
+
+const viewer = new OpenWanderer.Viewer('#pano', { svgEffects: false });
 
 // Specify our current lon/lat.
 viewer.setLonLat(-0.9807, 50.966275);

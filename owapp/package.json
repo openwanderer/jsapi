@@ -1,6 +1,6 @@
 {
     "name": "openwanderer-app",
-    "version": "0.0.7",
+    "version": "0.0.11",
     "repository": {
         "type": "git",
         "url": "https://github.com/openwanderer/jsapi"
@@ -9,16 +9,8 @@
     "license": "LGPL-3.0-or-later",
     "dependencies": {
         "jsfreemaplib": "^0.4.0",
-        "leaflet-rotatedmarker": "^0.2.0"
-    },
-    "devDependencies": {
-        "@babel/core": "^7.13.10",
-        "@babel/preset-env": "^7.13.10",
-        "babelify": "^10.0.0",
-        "browserify": "^17.0.0"
-    },
-    "scripts": {
-        "build": "browserify --standalone OWApp index.js -o bundle.js -t [babelify --presets [@babel/preset-env] ]"
-    },
-    "unpkg": "bundle.js"
+        "leaflet-rotatedmarker": "^0.2.0",
+        "openwanderer-jsapi": "^0.1.4",
+        "openwanderer-jsapi-transitions": "^0.1.2"
+    }
 }

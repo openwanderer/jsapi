@@ -2,14 +2,32 @@
 
 This directory contains a series of examples of using the OpenWanderer JavaScript API. This document walks you through the examples.
 
+## Important change! Build step now needed
+
+If is now necessary, as of `openwanderer-jsapi` 0.1.4, to *build* these examples. This can be done easily using Webpack. First install the dependencies:
+```
+npm install
+```
+and then build them:
+```
+npx webpack
+```
+The examples should then run without errors.
+
 ## Example 1 : A basic viewer application
 
 [Example 1](ex1.html) is a very simple application showing the use of `OpenWanderer.Viewer`. This class is the most basic class within the API and allows you to create a panorama viewer, set its location within the world (in WGS84 latitude/longitude and elevation in metres), and add markers (again using WGS84 lat/lon and elevation in metres). `OpenWanderer.Viewer` is essentially a thin wrapper around `PhotoSphereViewer.Viewer` from [Photo Sphere Viewer](https://photo-sphere-viewer.js.org), allowing you to position panoramas and add markers using 'world' (WGS84) latitudes and longitudes.
 
-So on to the code. First we create an `OpenWanderer.Viewer` object, specifying a CSS selector identifying the page element hosting the panorama:
+So on to the code. Before we do anything else we import the module:
 ```
-const viewer = new OpenWanderer.Viewer('#pano');
+import * as OpenWanderer from 'openwanderer-jsapi';
 ```
+We then create an `OpenWanderer.Viewer` object, specifying a CSS selector identifying the page element hosting the panorama:
+```
+const viewer = new OpenWanderer.Viewer('#pano', { svgEffects: false });
+```
+Note also how we turn the special SVG effects (highlighting elements on roll over) off. (Currently there is a bug preventing this working correctly if multiple colours are used for the markers).
+
 We can then position the panorama at a given real-world location (longitude,
 latitude and elevation). This one is near Butser Hill in the South Downs
 National Park of southern England.
@@ -69,10 +87,9 @@ viewer.addPath([
 
 Example 2 shows the basic use of the `OpenWanderer.Navigator` class, which allows you to navigate along a panorama sequence.
 
-We first create an `OpenWanderer.Navigator` object, again specifying the element
-hosting the panorama.
+Having imported the module as per the first example, we first create an `OpenWanderer.Navigator` object, again specifying the element hosting the panorama.
 ```
-const navigator = new OpenWandeerer.Navigator({
+const navigator = new OpenWanderer.Navigator({
     element: '#pano',
     ....
 });

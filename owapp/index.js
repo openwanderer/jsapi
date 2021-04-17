@@ -2,6 +2,8 @@ import Eventable from './eventable.js';
 import MapManager from './map.js';
 import XHRPromise from './xhrpromise.js';
 import { Dialog } from 'jsfreemaplib';
+import * as OpenWanderer from 'openwanderer-jsapi';
+import * as OWTransition from 'openwanderer-jsapi-transitions';
 
 class App extends Eventable {
     constructor(options) {

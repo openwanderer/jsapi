@@ -14,10 +14,11 @@ At present, the following classes exist:
 
 ## Including in your application
 
-The easiest way to include is via [unpkg](https://unpkg.com), e.g. for the latest version:
-```html
-<script type='text/javascript' src='https://unpkg.com/openwanderer-jsapi'></script>
-```
+Please see the relevant packages for build instructions:
+
+- [Core API](https://github.com/openwanderer/jsapi/tree/master/core)
+- [Transitions](https://github.com/openwanderer/jsapi/tree/master/transitions)
+- [App widget](https://github.com/openwanderer/jsapi/tree/master/owapp)
 
 ## Add-ons
 

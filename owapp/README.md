@@ -99,6 +99,22 @@ The events which can be handled are:
 - `rotationSaved`: when a new rotation correction has been successfully saved to the server. The event handler takes an object with `pan`, `tilt` and `roll` properties as a parameter. 
 
 
+## Including in your application
+
+For version 0.0.10 or above, you should use `npm` to install, e.g. in your package.json:
+```
+{
+    "dependencies": {
+        "openwanderer-app": "^0.0.10"
+    }
+}
+```
+Then `import` it into your application:
+```
+import * as OWApp from 'openwanderer-app';
+```
+and use a build tool such as Webpack to build it. 
+
 ## Example
 
 The full example app now uses `openwanderer-app`. See [here](https://github.com/openwanderer/example-app/tree/master/full). Note how the JavaScript needed to create a full app is minimal as the functionality is encapsulated by this package; however also note how the example app needs to setup the required containers in HTML and CSS, and include the required images.

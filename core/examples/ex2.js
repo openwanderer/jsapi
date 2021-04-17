@@ -1,4 +1,3 @@
-
 /*
  *
  * Example 2
@@ -6,6 +5,8 @@
  * Set up am OpenWanderer.Navigator object with a hard-coded pano sequence.
  *
  */ 
+
+import * as OpenWanderer from 'openwanderer-jsapi';
 
 const navigator = new OpenWanderer.Navigator({
     element: '#pano',    

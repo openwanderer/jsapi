@@ -14,11 +14,25 @@ At present, the following classes exist:
 
 ## Including in your application
 
-The easiest way to include is via [unpkg](https://unpkg.com), e.g. for the latest version:
+For versions 0.1.3 or lower, the easiest way to include is via [unpkg](https://unpkg.com), e.g. for the latest version:
 
 ```html
-<script type='text/javascript' src='https://unpkg.com/openwanderer-jsapi'></script>
+<script type='text/javascript' src='https://unpkg.com/openwanderer-jsapi@0.1.3'></script>
 ```
+
+For version 0.1.4 or above, a bundle is no longer distributed. You should use `npm` to install, e.g. in your package.json:
+```
+{
+	"dependencies": {
+		"openwanderer-jsapi": "^0.1.4"
+	}
+}
+```
+Then `import` it into your application:
+```
+import * as OpenWanderer from 'openwanderer-jsapi';
+```
+and use a build tool such as Webpack to build it. 
 
 Note that the dependencies, notably Photo Sphere Viewer, will be included automatically: however you still need to manually include the *CSS* for Photo Sphere Viewer in your HTML:
 
