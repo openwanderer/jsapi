@@ -28,6 +28,7 @@ class App extends Eventable {
         this.api.signup = this.api.signup || 'user/signup';
         this.api.logout = this.api.logout || 'user/logout';
         this.api.rotate = this.api.rotate || 'panorama/{id}/rotate';
+        this.setupUpload = options.setupUpload || (options.setupUpload === false ? false : this.defaultSetupUpload);
         this.setupCss(css);
         this.setupNavigator(options.navigator);
         this.setupControls(options.controlContainer, options.controlIcons);
@@ -37,13 +38,17 @@ class App extends Eventable {
         this.dialogParent = options.dialogParent || document.body;
         this.setupSearchControl();
         this.setupRotateControls();
-        this.setupUploadForm();
+        if(this.setupUpload) {
+            this.setupUploadForm();
+        }
         this.panoEl = this.navigator.viewer.psv.parent;
         this.mapEl = document.createElement("div");
         this.mapEl.id = "ow_map";
         this.panoEl.parentElement.appendChild(this.mapEl);
         this.setupMediaQueries();
-        this.setupUpload();
+        if(this.setupUpload) {
+            this.setupUpload();
+        }
         this.setupMap(options.zoom || 16, options.cameraIcon);
         this.setupModes();
         this.navigator.on('locationChanged',(lon,lat)=> {
@@ -273,10 +278,7 @@ class App extends Eventable {
     }
             
 
-    setupUpload () {
-        if(!this.uploadContainer) {
-            throw `Cannot use default setupUpload() without an uploadContainer! Please subclass App and override setupUpload()`;
-        }
+    defaultSetupUpload () {
         document.getElementById('ow_uploadBtn').addEventListener("click", async(e) => {
             const panofiles = document.getElementById("ow_panoFiles").files;
             if(panofiles.length == 0) {
