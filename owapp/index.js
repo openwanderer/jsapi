@@ -23,6 +23,7 @@ class App extends Eventable {
              login: options.css.login || `left: 37%; top: 25%; width: 25%; height: 288px; `,
              mapPreview: options.css.mapPreview || 'left: calc(100% - 200px); bottom: 0px; width:200px; height: 200px; display: block; position: absolute'
         };
+        this.createSequence = options.createSequence === false ? false : true;
         this.api = options.api || {};
         this.api.login = this.api.login || 'user/login';
         this.api.signup = this.api.signup || 'user/signup';
@@ -302,7 +303,7 @@ class App extends Eventable {
                     if(json.error) {
                         alert(`Upload error: ${json.error}`);
                     } else if (json.warning) {
-                        alert(`Upload warning: ${json.warning}`);
+                        alert(`Upload warning: ${json.warning.length === undefined ? json.warning : json.warning.join(',')}`);
                     } else if (result.status != 200) {
                         alert(`HTTP error: status ${result.status}`);
                     } else if (json.id) {
@@ -314,7 +315,7 @@ class App extends Eventable {
                     alert(`Network error: ${e}`);
                 }
             }
-            if(panoids.length > 0) {
+            if(this.createSequence && panoids.length > 0) {
                 try { 
                     const response = await fetch('sequence/create', {
                         method: 'POST',
