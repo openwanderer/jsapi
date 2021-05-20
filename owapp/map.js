@@ -1,6 +1,8 @@
 import Eventable from './eventable.js';
 //import './node_modules/leaflet-rotatedmarker/leaflet.rotatedMarker.js';
+import 'leaflet';
 import 'leaflet-rotatedmarker';
+import 'leaflet.markercluster';
 
 class MapManager extends Eventable {
     constructor(options) {
