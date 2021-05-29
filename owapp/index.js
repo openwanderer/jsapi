@@ -525,9 +525,6 @@ class App extends Eventable {
                     this.isadmin = json.isadmin;
                     this.loginDlg.hide();
                     this.onLoginStateChange();
-                    if(this.events.login) {
-                        this.events.login(json);
-                    }
                 }
              })
             .catch(e => { 
@@ -588,6 +585,13 @@ class App extends Eventable {
             document.getElementById(this.rotateControlsContainer).style.display = "block";
         }
         this.mapMgr.activated = true;    
+        if(this.events.login) {
+            this.events.login({
+                username: this.username,
+                userid: this.userid,
+                isadmin: this.isadmin
+            });
+        }
     }
 
     onLogout() {
@@ -613,6 +617,9 @@ class App extends Eventable {
         document.getElementById("ow_rotate").style.display = "none";
         document.getElementById("ow_delete").style.display = "none";
         this.mapMgr.activated = false;    
+        if(this.events.logout) {
+            this.events.logout();
+        }
     } 
 
     logout() {
@@ -620,9 +627,6 @@ class App extends Eventable {
             this.username = null;
             this.userid = this.isadmin = 0; 
             this.onLoginStateChange();
-            if(this.events.logout) {
-                this.events.logout();
-            }
         });
     }
 }
