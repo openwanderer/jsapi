@@ -25,6 +25,7 @@ class MapManager extends Eventable {
         this.api.del = this.api.del || 'panorama/{id}';
         
         this.initialised = false;
+        this.newPanos = { };
     }
 
     setupLeafletMap(zoom) {
@@ -226,6 +227,52 @@ class MapManager extends Eventable {
         this.geojsonLayer.clearLayers();
         this.markerClusterGroup.clearLayers();
         this.indexedFeatures = [];
+    }
+
+     addNewPano(id, lat, lon) {
+        var cameraIcon = L.icon({
+                iconUrl: 'images/camera.png',
+                iconSize:[24,24],
+                iconAnchor:[12,12],
+                popupAnchor:[8,8]
+            });
+        if(this.newPanos[id]) {
+            this.map.removeLayer(this.newPanos[id].icon);
+            this.map.removeLayer(this.newPanos[id].circle);
+        }
+        var latlng = [lat, lon];
+        var p = L.marker(latlng, {icon: cameraIcon} ).addTo(this.map);
+        var circle = L.circle(latlng, { radius: 30, color:'#ff8800',opacity:0.5}).addTo(this.map);
+        this.doSelectNewPano(latlng);
+        this.newPanos[id] = { icon: p, circle: circle };
+        this.map.addLayer(p);
+    }
+
+    selectNewPano(id) {
+        if(this.newPanos[id]) {
+            var latlng = this.newPanos[id].icon.getLatLng();
+            this.doSelectNewPano(latlng);
+            this.map.setView(latlng);
+        }
+    }
+
+    doSelectNewPano(latlng) {
+        if(this.selectedNewPano) {
+            this.map.removeLayer(this.selectedNewPano);
+        }
+        this.selectedNewPano = L.circle(latlng, { radius: 50, color: 'red', fillColor: 'red', opacity:0.5}).addTo(this.map);
+            
+    }
+
+    removeNewPanos() {
+        for (var i in this.newPanos) {
+            this.map.removeLayer(this.newPanos[i].icon);
+            this.map.removeLayer(this.newPanos[i].circle);
+        }
+        this.newPanos = {};
+        if(this.selectedNewPano) {
+            this.map.removeLayer(this.selectedNewPano);
+        }
     }
 }
 
