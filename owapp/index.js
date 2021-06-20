@@ -441,8 +441,8 @@ class App extends Eventable {
             if(response.status == 200) {
                 if(this.events.rotationSaved) {
                     this.events.rotationSaved(orientations);
-                    alert('Saved new rotation');
                 } 
+                alert('Saved new rotation');
             } else {
                 alert(response.status == 401 ? 'This is not your panorama.' : `HTTP error: ${response.status}`);
                 
