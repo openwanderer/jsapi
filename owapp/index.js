@@ -29,6 +29,9 @@ class App extends Eventable {
         this.api.signup = this.api.signup || 'user/signup';
         this.api.logout = this.api.logout || 'user/logout';
         this.api.rotate = this.api.rotate || 'panorama/{id}/rotate';
+        this.api.nearest = this.api.nearest || 'nearest/{lon}/{lat}';
+        this.api.sequence = this.api.sequence || 'sequence/{id}';
+        this.api.sequenceCreate = this.api.sequenceCreate || 'sequence/create';
         this.setupUpload = options.setupUpload || (options.setupUpload === false ? false : this.defaultSetupUpload);
         this.setupCss(css);
         this.setupNavigator(options.navigator);
@@ -102,8 +105,8 @@ class App extends Eventable {
                 api: { 
                     byId: 'panorama/{id}', 
                     panoImg: 'panorama/{id}.jpg',
-                    nearest: 'nearest/{lon}/{lat}',
-                    sequenceUrl: 'sequence/{id}'
+                    nearest: this.api.nearest || 'nearest/{lon}/{lat}',
+                    sequenceUrl: this.api.sequence || 'sequence/{id}'
                 },
                 splitPath: true,
                 svgEffects: true,
@@ -317,7 +320,7 @@ class App extends Eventable {
             }
             if(this.createSequence && panoids.length > 0) {
                 try { 
-                    const response = await fetch('sequence/create', {
+                    const response = await fetch(this.api.sequenceCreate || 'sequence/create', {
                         method: 'POST',
                         body: JSON.stringify(panoids),
                         headers: {
