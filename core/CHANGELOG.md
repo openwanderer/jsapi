@@ -3,6 +3,8 @@ Changelog
 
 ## "Stable" versions (though still early in development)
 
+- v0.1.5 (08/11/21) - functionality to add arbitrary shapes (defined by ENU points) to the panorama. Can be used, for example, to add 3D navigation arrows.
+
 - v0.1.4 (16/04/21) - functionality unchanged but no longer builds a bundle. If using 0.1.4 upwards, you should include into your project via npm, import as a module, and use a tool such as Webpack to build.
 
 - v0.1.3 (23/03/21) - Eesger's SVG mouseover effects moved to `viewer.js` so that they can be used without a navigator. Also SVG mouseover colour can now be specified.

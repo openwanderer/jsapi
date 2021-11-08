@@ -299,6 +299,44 @@ class Viewer {
         return values;
     }
 
+
+    /* addShape()
+     *
+     * Adds an arbitrary shape (defined as ENU points) to the panorama.
+     *
+     * A typical use case might be to add an arrow, pointing the way to the
+     * next panorama.
+     *
+     * Input : an array of ENU points (RELATIVE east, north and elevation, all
+     * relative to the current panorama, not absolute).
+     *
+     * Returns: Nothing 
+     *
+     */
+    addShape(enuPoints, options) {
+        const spherical = [];
+        let b0;
+        enuPoints.forEach( (b,i) => {
+            b = enuPlusMarkerdata(b, (this.psv.prop.panoData.poseHeading || 0) * (Math.PI/180) + this.orientationCorrection.pan);
+
+            spherical.push([b[5], b[4]]);
+            if(i==0) b0 = b;
+        });
+        spherical.push([b0[5], b0[4]]);
+        this.markersPlugin.addMarker({
+                id: options.id,
+                polylineRad: spherical,
+                svgStyle: {
+                    fill:  options.fill || 'rgba(255, 255, 0, 0.4)',
+                    stroke: options.stroke || 'rgba(255, 255, 0, 1.0)',
+                },
+                tooltip: options.tooltip,
+                data: {
+                    type: options.type || 'shape'
+                }
+        });
+    }
+
     /* _createPath()
      *
      * Internal method to create a path
