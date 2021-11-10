@@ -451,9 +451,7 @@ class Viewer {
             return; 
          }
 
-         if (this.markerBaseFill === undefined) {
-             this.markerBaseFill = marker.config.svgStyle.fill;
-         }
+         this.curMarkerBaseFill = marker.config.svgStyle.fill;
          let fillNew = 'url(#GAgradient1)';
 
   
@@ -461,7 +459,7 @@ class Viewer {
             id   : markerID,
             svgStyle : {
                   fill       : fillNew,
-                  stroke     : this.markerBaseFill.replace(/([0-9.]+)\)/, 
+                  stroke     : this.curMarkerBaseFill.replace(/([0-9.]+)\)/, 
                     (x,y)=> parseFloat(y)/4+')' 
                    ),
               strokeWidth: '1px',//'0.1em',
@@ -475,7 +473,7 @@ class Viewer {
 
         const marker = this.markersPlugin.markers[markerID];
   
-        let fillNew = this.markerBaseFill;
+        let fillNew = this.curMarkerBaseFill;
         if (!marker
             ||  marker.type == 'image'
             || !marker.config.svgStyle
