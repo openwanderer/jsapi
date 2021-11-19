@@ -32,6 +32,7 @@ class App extends Eventable {
         this.api.nearest = this.api.nearest || 'nearest/{lon}/{lat}';
         this.api.sequence = this.api.sequence || 'sequence/{id}';
         this.api.sequenceCreate = this.api.sequenceCreate || 'sequence/create';
+        this.nomproxy = options.nomproxy || 'nomproxy'; 
         this.setupUpload = options.setupUpload || (options.setupUpload === false ? false : this.defaultSetupUpload);
         this.setupCss(css);
         this.setupNavigator(options.navigator);
@@ -359,7 +360,7 @@ class App extends Eventable {
     }
 
     nominatimSearch(q) {
-        fetch(`nomproxy.php?q=${q}`)
+        fetch(`${this.nomproxy}?q=${q}`)
                 .then(response=>response.json())
                 .then(json=> {
                     var nodes = json.filter(o => o.lat != undefined && o.lon != undefined);
