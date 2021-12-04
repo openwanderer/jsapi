@@ -14,7 +14,7 @@ class MapManager extends Eventable {
         this.onPanoMarkerClick = options.onPanoMarkerClick;
         this.markerClusterGroup = L.markerClusterGroup({disableClusteringAtZoom: 14});
         this.cameraIcon = options.cameraIcon;
-        this.setupLeafletMap(options.zoom || 16);
+        this.setupLeafletMap(options.zoom || 16, options.mapUrl, options.mapAttribution || 'Map data copyright OpenStreetMap Contributors, ODBL');
         this.onPanoChange = options.onPanoChange;
         this.onMapChange = options.onMapChange || null;
         this.panoMarkers = {};
@@ -28,12 +28,12 @@ class MapManager extends Eventable {
         this.newPanos = { };
     }
 
-    setupLeafletMap(zoom) {
+    setupLeafletMap(zoom, url, attribution) {
         if(!this.map) {
             this.map = L.map('ow_map', {maxZoom:20});
             this.map.setZoom(zoom);
             this.map.addLayer(this.markerClusterGroup);
-            this.layer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {attribution: 'Map data (c)OpenStreetMap contributors, ODBL; contours SRTM | Map display: &copy; OpenTopoMap (CC-By-SA)', maxZoom: 20, maxNativeZoom: 16});
+            this.layer = L.tileLayer(url,  {attribution: attribution, maxZoom: 20, maxNativeZoom: 16});
             this.layer.addTo(this.map);
             this.map.on("dragend", e=> { 
                 const lat = this.map.getCenter().lat.toFixed(4);
