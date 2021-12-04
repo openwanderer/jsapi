@@ -14,7 +14,7 @@ class MapManager extends Eventable {
         this.onPanoMarkerClick = options.onPanoMarkerClick;
         this.markerClusterGroup = L.markerClusterGroup({disableClusteringAtZoom: 14});
         this.cameraIcon = options.cameraIcon;
-        this.setupLeafletMap(options.zoom || 16, options.mapUrl, options.mapAttribution || 'Map data copyright OpenStreetMap Contributors, ODBL');
+        this.setupLeafletMap(options.zoom || 16, options.url, options.attribution || 'Map data copyright OpenStreetMap Contributors, ODBL');
         this.onPanoChange = options.onPanoChange;
         this.onMapChange = options.onMapChange || null;
         this.panoMarkers = {};
@@ -29,6 +29,7 @@ class MapManager extends Eventable {
     }
 
     setupLeafletMap(zoom, url, attribution) {
+		console.log(`SETUPLEAFLETMAP: url=${url} attr=${attribution}`);
         if(!this.map) {
             this.map = L.map('ow_map', {maxZoom:20});
             this.map.setZoom(zoom);
@@ -277,4 +278,3 @@ class MapManager extends Eventable {
 }
 
 export default MapManager;
-

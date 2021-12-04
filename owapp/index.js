@@ -40,6 +40,8 @@ class App extends Eventable {
         this.searchContainer = options.searchContainer;
         this.rotateControlsContainer = options.rotateControlsContainer;
         this.uploadContainer = options.uploadContainer;
+        this.mapUrl = options.mapUrl;
+        this.mapAttribution = options.mapAttribution;
         this.dialogParent = options.dialogParent || document.body;
         this.setupSearchControl();
         this.setupRotateControls();
@@ -238,7 +240,9 @@ class App extends Eventable {
                                     rotate: this.api.rotate,
                                     del: this.api.del,
                                     panos: this.api.panos
-                                }
+                                },
+                                url: this.mapUrl,
+                                attribution: this.mapAttribution 
                             });
             document.getElementById("ow_select").addEventListener("click", 
                 this.selectPanoChangeMode.bind(this, 0));
@@ -639,3 +643,4 @@ class App extends Eventable {
 export {
     App
 } 
+
