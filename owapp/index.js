@@ -33,6 +33,7 @@ class App extends Eventable {
         this.api.sequence = this.api.sequence || 'sequence/{id}';
         this.api.sequenceCreate = this.api.sequenceCreate || 'sequence/create';
         this.nomproxy = options.nomproxy || 'nomproxy'; 
+        this.transitions = options.transitions;
         this.setupUpload = options.setupUpload || (options.setupUpload === false ? false : this.defaultSetupUpload);
         this.setupCss(css);
         this.setupNavigator(options.navigator);
@@ -113,10 +114,12 @@ class App extends Eventable {
                 },
                 splitPath: true,
                 svgEffects: true,
-                panoTransFunc: OWTransition.Transition.goTo.bind(OWTransition.Transition)
+                panoTransFunc: this.transitions ? OWTransition.Transition.goTo.bind(OWTransition.Transition) : null
             });
 
-            OWTransition.Transition.init(this.navigator);
+            if(this.transitions) {
+                OWTransition.Transition.init(this.navigator);
+            }
         }
     }
 
