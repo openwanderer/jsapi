@@ -49,6 +49,8 @@ Note the options. All are required unless marked as optional.
 
 - `dialogStyle` (optional) : allows you to setup the background and text colours of the signup and login dialogs, otherwise default colours will be used. For example:
 
+- `splitPath`, `svgEffects`, `panoMarkers` : these are passed directly to the `Navigator` to control its behaviour.
+
 ```
 const app = new OWApp.App({
     // ...,

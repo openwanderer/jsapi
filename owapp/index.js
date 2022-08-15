@@ -36,7 +36,7 @@ class App extends Eventable {
         this.transitions = options.transitions;
         this.setupUpload = options.setupUpload || (options.setupUpload === false ? false : this.defaultSetupUpload);
         this.setupCss(css);
-        this.setupNavigator(options.navigator);
+        this.setupNavigator(options.navigator, options);
         this.setupControls(options.controlContainer, options.controlIcons);
         this.searchContainer = options.searchContainer;
         this.rotateControlsContainer = options.rotateControlsContainer;
@@ -101,7 +101,7 @@ class App extends Eventable {
         document.querySelector("head").appendChild(style);
     }
 
-    setupNavigator(nav) {
+    setupNavigator(nav, options) {
         if(nav) {
             this.navigator = nav;
         } else {
@@ -112,8 +112,9 @@ class App extends Eventable {
                     nearest: this.api.nearest || 'nearest/{lon}/{lat}',
                     sequenceUrl: this.api.sequence || 'sequence/{id}'
                 },
-                splitPath: true,
-                svgEffects: true,
+                splitPath: options.splitPath || false,
+                svgEffects: options.svgEffects || true,
+                panoMarkers: options.panoMarkers || false,
                 panoTransFunc: this.transitions ? OWTransition.Transition.goTo.bind(OWTransition.Transition) : null
             });
 
