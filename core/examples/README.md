@@ -147,8 +147,7 @@ will load the panorama with the ID 1 (the first in the array):
 ```
 navigator.loadPanorama(1);
 ```
-This will show the panorama, and also show you the sequence as a navigable polyline route. The other panoramas in the sequence are shown as clickable markers;
-you can navigate to another panorama by clicking on it.
+This will show the panorama, and allow you to navigate to the previous and next panorama by clicking the arrows. By setting `panoMarkers` to `true` in the `Navigator` options, you can see the entire sequence as a navigable polyline route. The other panoramas in the sequence are shown as clickable markers; you can navigate to another panorama by clicking on it.
 
 ## Further examples
 

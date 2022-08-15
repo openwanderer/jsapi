@@ -24,7 +24,7 @@ For version 0.1.4 or above, a bundle is no longer distributed. You should use `n
 ```
 {
 	"dependencies": {
-		"openwanderer-jsapi": "^0.1.4"
+		"openwanderer-jsapi": "^0.3.0"
 	}
 }
 ```

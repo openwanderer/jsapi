@@ -3,6 +3,8 @@ Changelog
 
 ## "Stable" versions (though still early in development)
 
+- v0.3.0 (15/08/22) - Navigator shows simple arrows to link panoramas by default (as in OpenTrailView), for a cleaner UI. However pano markers and full sequence paths still available via the Navigator `panoMarkers` option when set to `true`. Also, fixed bug which caused error when sequence route clicked.
+
 - v0.1.5 (08/11/21) - functionality to add arbitrary shapes (defined by ENU points) to the panorama. Can be used, for example, to add 3D navigation arrows.
 
 - v0.1.4 (16/04/21) - functionality unchanged but no longer builds a bundle. If using 0.1.4 upwards, you should include into your project via npm, import as a module, and use a tool such as Webpack to build.

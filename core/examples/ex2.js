@@ -10,6 +10,11 @@ import * as OpenWanderer from 'openwanderer-jsapi';
 
 const navigator = new OpenWanderer.Navigator({
     element: '#pano',    
+
+    // Set to 'true' to show markers at the location of each panorama, together
+	// with a polyline showing the full panorama sequence.
+    panoMarkers: false,
+
     // The sequence is an array of objects with the properties for each
     // image. To work correctely, the first five properties must be provided.
     // 'pancorrection' is optional and should be provided

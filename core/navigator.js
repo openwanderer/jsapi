@@ -108,11 +108,18 @@ class Navigator {
         this.api.nearest = this.api.nearest || 'nearest/{lon}/{lat}';
         this.svgEffects = options.svgEffects === undefined ? true: options.svgEffects;
         this.svgOver = options.svgOver || { red: 255, green: 255, blue: 0 };
+        this.panoMarkers = options.panoMarkers || false;
         this.panoTransFunc = options.panoTransFunc || null;
         this.pathClickHandler = options.pathClickHandler || (marker => {
-            let [seqid, idx] = marker.id.split('-').map(n => parseInt(n));
-            idx = idx < this.curPanoIdx ?  idx: idx+1;
-            return this.sequences[seqid].panos[idx].panoid;
+            if (this.panoMarkers) {
+                let [seqid, idx] = marker.id.split('-').map(n => parseInt(n));
+                idx = idx < this.curPanoIdx ?  idx: idx+1;
+                return this.sequences[seqid].panos[idx].panoid;
+            } else {
+                const data = marker.id.split('-');
+                this.curPanoIdx = parseInt(data[3]);
+                return parseInt(data[2]);
+            }
         });
         this.markerClickHandler = options.markerClickHandler || (marker => {
             return parseInt(marker.id.split('-')[2]);
@@ -122,7 +129,9 @@ class Navigator {
             let id;
             switch(marker.data.type) {
                 case 'path':
-                    id = this.pathClickHandler(marker);
+                    if(this.splitPath || !this.panoMarkers) {
+                        id = this.pathClickHandler(marker);
+                    }
                     break;
                 case 'marker':
                     id = this.markerClickHandler(marker);
@@ -183,6 +192,7 @@ class Navigator {
     async _loadMarkers(id) {    
         this.viewer.markersPlugin.clearMarkers();
         if(this.panoMetadata[id] && this.loadSequence && !this.panoMetadata[id].sequence) {
+            conosole.log('doing sequence load');
             if(!this.sequences[this.panoMetadata[id].seqid]) {
                 this.sequences[this.panoMetadata[id].seqid] = 
                     await this.loadSequence(
@@ -236,11 +246,79 @@ class Navigator {
     }
 
     _setPano(id) { 
+        if(this.curPanoIdx < 0) {
+            this.panoMetadata[id].sequence.panos.forEach ( (pano, i) => {
+                if(pano.panoid == id) {
+                    this.curPanoIdx = i;
+                }
+            });
+        }
         this._emitPanoChangeEvents(id);
         this.viewer.setLonLat(this.panoMetadata[id].lon, this.panoMetadata[id].lat);
         this.viewer.setElevation(this.panoMetadata[id].ele + 1.5);
         //this.viewer.setElevation(1.5);
-        this._createPaths(id);
+        if(this.panoMarkers) {
+            this._createPaths(id);
+        } else {
+            let bearing;
+            if (this.curPanoIdx > 0) {
+                const lastPano = this.panoMetadata[id].sequence.panos[this.curPanoIdx - 1];
+                bearing = this._getBearing(
+                    this.panoMetadata[id].lon, 
+                    this.panoMetadata[id].lat, 
+                    lastPano.lon, 
+                    lastPano.lat
+                ); 
+                this._drawArrow(
+                    this.panoMetadata[id].lon, 
+                    this.panoMetadata[id].lat, 
+                    bearing, 
+                    2, 3, 
+                    lastPano.panoid,
+                    this.curPanoIdx - 1
+                );
+             } 
+
+            if (this.curPanoIdx < this.panoMetadata[id].sequence.panos.length - 1) {
+                const nextPano = this.panoMetadata[id].sequence.panos[this.curPanoIdx + 1];
+                bearing = this._getBearing(
+                    this.panoMetadata[id].lon, 
+                    this.panoMetadata[id].lat, 
+                    nextPano.lon, 
+                    nextPano.lat
+                ); 
+
+                this._drawArrow(
+                    this.panoMetadata[id].lon, 
+                    this.panoMetadata[id].lat, 
+                    bearing, 
+                    2, 3, 
+                    nextPano.panoid,
+                    this.curPanoIdx + 1
+                );
+            }
+        }
+    }
+
+    // Note: used algorithm from @turf/bearing (license: MIT)
+    // 
+    // https://github.com/Turfjs/turf/blob/master/packages/turf-bearing/index.ts
+    //
+    // See: https://github.com/Turfjs/turf
+
+    _getBearing(lon1, lat1, lon2, lat2) {
+        const rads = [lon1, lat1, lon2, lat2].map( arg => this._degToRad(arg) );
+        const a = Math.sin(rads[2] - rads[0]) * Math.cos(rads[1]);
+        const b = Math.cos(rads[1]) * Math.sin(rads[3]) - Math.sin(rads[1]) * Math.cos(rads[3]) * Math.cos(rads[2] - rads[0]);
+        return this._radToDeg(Math.atan2(a,b));
+    }
+
+    _degToRad(deg) {
+        return deg * (Math.PI / 180.0);
+    }
+
+    _radToDeg(rad) {
+        return rad * (180.0 / Math.PI);
     }
 
     _emitPanoChangeEvents(id) {
@@ -276,6 +354,31 @@ class Navigator {
                 splitPath: this.splitPath,
             });
         }
+    }
+
+    _drawArrow(lon, lat, bearing, origin, lengthMetres, targetPanoId, targetPanoIdx) {
+        const bearingRadians = bearing * (Math.PI / 180.0);
+        const s = Math.sin(bearingRadians), c = Math.cos(bearingRadians);
+        const e = 0, n = origin*c, n1 = n+lengthMetres*c, e1 = e+lengthMetres*s;
+
+        const p = [
+            [ e-lengthMetres*0.1*c,  n+lengthMetres*0.1*s, -1.6 ],
+            [ e+lengthMetres*0.1*c,   n-lengthMetres*0.1*s, -1.6 ],
+            [ e1+lengthMetres*0.1*c,  n1-lengthMetres*0.1*s, -1.6 ],
+            [ e1+lengthMetres*0.2*c,  n1-lengthMetres*0.2*s, -1.6 ],
+            [ e+lengthMetres*1.1*s,   n+lengthMetres*1.1*c, -1.6 ],
+            [ e1-lengthMetres*0.2*c,  n1+lengthMetres*0.2*s, -1.6 ],
+            [ e1-lengthMetres*0.1*c,  n1+lengthMetres*0.1*s, -1.6 ]
+        ];
+
+        this.viewer.addShape(p,  {
+            id: `path-${this.curPanoId}-${targetPanoId}-${targetPanoIdx}-arrow`,
+            //tooltip: `Route from #${nav.curPanoId} to #${targetPanoId}`,
+            tooltip: `To pano #${targetPanoId}`,
+            fill: 'rgba(255, 255, 0, 0.6)',
+            stroke: 'rgba(255, 255, 0, 0.9)',
+            type: 'path'
+        });
     }
 
     async update(id, properties) {
